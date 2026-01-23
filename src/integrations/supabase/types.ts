@@ -14,16 +14,428 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calendar_events: {
+        Row: {
+          created_at: string
+          created_by_user_id: string | null
+          description: string | null
+          end_date_time: string | null
+          family_tree_id: string
+          id: string
+          related_person_id: string | null
+          start_date_time: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          end_date_time?: string | null
+          family_tree_id: string
+          id?: string
+          related_person_id?: string | null
+          start_date_time: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by_user_id?: string | null
+          description?: string | null
+          end_date_time?: string | null
+          family_tree_id?: string
+          id?: string
+          related_person_id?: string | null
+          start_date_time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_family_tree_id_fkey"
+            columns: ["family_tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_related_person_id_fkey"
+            columns: ["related_person_id"]
+            isOneToOne: false
+            referencedRelation: "tree_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      family_trees: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          owner_user_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_user_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_user_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      person_notes: {
+        Row: {
+          author_user_id: string | null
+          content: string
+          created_at: string
+          id: string
+          person_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          person_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_user_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          person_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "person_notes_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "tree_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photo_tags: {
+        Row: {
+          created_at: string
+          id: string
+          person_id: string
+          photo_id: string
+          tagged_by_user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          person_id: string
+          photo_id: string
+          tagged_by_user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          person_id?: string
+          photo_id?: string
+          tagged_by_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_tags_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "tree_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photo_tags_photo_id_fkey"
+            columns: ["photo_id"]
+            isOneToOne: false
+            referencedRelation: "photos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          family_tree_id: string
+          id: string
+          storage_path: string
+          uploaded_by_user_id: string | null
+          url: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          family_tree_id: string
+          id?: string
+          storage_path: string
+          uploaded_by_user_id?: string | null
+          url: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          family_tree_id?: string
+          id?: string
+          storage_path?: string
+          uploaded_by_user_id?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_family_tree_id_fkey"
+            columns: ["family_tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          current_period_end: string | null
+          full_name: string | null
+          id: string
+          plan_type: string | null
+          stripe_customer_id: string | null
+          subscription_status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          full_name?: string | null
+          id?: string
+          plan_type?: string | null
+          stripe_customer_id?: string | null
+          subscription_status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          full_name?: string | null
+          id?: string
+          plan_type?: string | null
+          stripe_customer_id?: string | null
+          subscription_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      relationships: {
+        Row: {
+          by_marriage: boolean | null
+          created_at: string
+          created_by_user_id: string | null
+          family_tree_id: string
+          from_person_id: string
+          id: string
+          relationship_type: Database["public"]["Enums"]["relationship_type"]
+          to_person_id: string
+        }
+        Insert: {
+          by_marriage?: boolean | null
+          created_at?: string
+          created_by_user_id?: string | null
+          family_tree_id: string
+          from_person_id: string
+          id?: string
+          relationship_type: Database["public"]["Enums"]["relationship_type"]
+          to_person_id: string
+        }
+        Update: {
+          by_marriage?: boolean | null
+          created_at?: string
+          created_by_user_id?: string | null
+          family_tree_id?: string
+          from_person_id?: string
+          id?: string
+          relationship_type?: Database["public"]["Enums"]["relationship_type"]
+          to_person_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relationships_family_tree_id_fkey"
+            columns: ["family_tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relationships_from_person_id_fkey"
+            columns: ["from_person_id"]
+            isOneToOne: false
+            referencedRelation: "tree_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relationships_to_person_id_fkey"
+            columns: ["to_person_id"]
+            isOneToOne: false
+            referencedRelation: "tree_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_collaborators: {
+        Row: {
+          created_at: string
+          email: string
+          family_tree_id: string
+          id: string
+          invite_status: Database["public"]["Enums"]["invite_status"]
+          invited_by_user_id: string
+          role: Database["public"]["Enums"]["collaborator_role"]
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          family_tree_id: string
+          id?: string
+          invite_status?: Database["public"]["Enums"]["invite_status"]
+          invited_by_user_id: string
+          role?: Database["public"]["Enums"]["collaborator_role"]
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          family_tree_id?: string
+          id?: string
+          invite_status?: Database["public"]["Enums"]["invite_status"]
+          invited_by_user_id?: string
+          role?: Database["public"]["Enums"]["collaborator_role"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_collaborators_family_tree_id_fkey"
+            columns: ["family_tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tree_members: {
+        Row: {
+          birth_date: string | null
+          created_at: string
+          created_by_user_id: string | null
+          death_date: string | null
+          family_tree_id: string
+          first_name: string
+          id: string
+          last_name: string | null
+          profile_photo_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          birth_date?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          death_date?: string | null
+          family_tree_id: string
+          first_name: string
+          id?: string
+          last_name?: string | null
+          profile_photo_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string | null
+          created_at?: string
+          created_by_user_id?: string | null
+          death_date?: string | null
+          family_tree_id?: string
+          first_name?: string
+          id?: string
+          last_name?: string | null
+          profile_photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tree_members_family_tree_id_fkey"
+            columns: ["family_tree_id"]
+            isOneToOne: false
+            referencedRelation: "family_trees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_edit_tree: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_tree_access: {
+        Args: { _tree_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      collaborator_role: "owner" | "editor" | "viewer"
+      invite_status: "pending" | "accepted" | "declined"
+      relationship_type: "parent" | "child" | "spouse" | "sibling" | "partner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +562,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      collaborator_role: ["owner", "editor", "viewer"],
+      invite_status: ["pending", "accepted", "declined"],
+      relationship_type: ["parent", "child", "spouse", "sibling", "partner"],
+    },
   },
 } as const
