@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Plus, TreeDeciduous, Users, LogOut, Loader2, MoreVertical, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { useFamilyTrees } from "@/hooks/useFamilyTrees";
+import { usePendingInvites } from "@/hooks/useCollaborators";
 import { CreateTreeDialog } from "@/components/tree/CreateTreeDialog";
+import { PendingInvitesCard } from "@/components/collaborators/PendingInvitesCard";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,14 +26,28 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
+import type { TreeCollaboratorWithTree } from "@/types/database";
 
 const Dashboard = () => {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { trees, isLoading: treesLoading, createTree, deleteTree } = useFamilyTrees();
+  const { pendingInvites, isLoading: invitesLoading, acceptInvite, declineInvite } = usePendingInvites();
+  const [searchParams] = useSearchParams();
   
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [treeToDelete, setTreeToDelete] = useState<string | null>(null);
+
+  // Handle invite deep link
+  useEffect(() => {
+    const inviteId = searchParams.get("invite");
+    if (inviteId && pendingInvites.length > 0) {
+      const matchingInvite = pendingInvites.find((inv) => inv.id === inviteId);
+      if (matchingInvite) {
+        acceptInvite.mutate(inviteId);
+      }
+    }
+  }, [searchParams, pendingInvites]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -83,11 +99,20 @@ const Dashboard = () => {
           </Button>
         </div>
 
+        {/* Pending Invites */}
+        <PendingInvitesCard
+          invites={pendingInvites as TreeCollaboratorWithTree[]}
+          onAccept={(id) => acceptInvite.mutate(id)}
+          onDecline={(id) => declineInvite.mutate(id)}
+          isAccepting={acceptInvite.isPending}
+          isDeclining={declineInvite.isPending}
+        />
+
         {/* Trees Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6"
         >
           {/* Create Tree Card */}
           <button

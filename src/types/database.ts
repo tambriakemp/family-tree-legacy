@@ -164,3 +164,17 @@ export interface CreatePersonNoteInput {
   person_id: string;
   content: string;
 }
+
+export interface CreateInviteInput {
+  family_tree_id: string;
+  email: string;
+  role: CollaboratorRole;
+}
+
+export interface TreeCollaboratorWithTree extends TreeCollaborator {
+  family_trees: {
+    id: string;
+    title: string;
+    owner_user_id: string;
+  } | null;
+}

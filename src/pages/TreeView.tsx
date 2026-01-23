@@ -6,23 +6,33 @@ import { Button } from "@/components/ui/button";
 import { useFamilyTree } from "@/hooks/useFamilyTrees";
 import { useTreeMembers } from "@/hooks/useTreeMembers";
 import { useRelationships } from "@/hooks/useRelationships";
+import { useCollaborators } from "@/hooks/useCollaborators";
+import { useAuth } from "@/hooks/useAuth";
 import { PersonNode } from "@/components/tree/PersonNode";
 import { PersonFormDialog } from "@/components/tree/PersonFormDialog";
 import { RelationshipFormDialog } from "@/components/tree/RelationshipFormDialog";
 import { PersonDetailDrawer } from "@/components/tree/PersonDetailDrawer";
-import type { TreeMember, RelationshipType, CreateTreeMemberInput, UpdateTreeMemberInput } from "@/types/database";
+import { InviteCollaboratorDialog } from "@/components/collaborators/InviteCollaboratorDialog";
+import { CollaboratorList } from "@/components/collaborators/CollaboratorList";
+import type { TreeMember, RelationshipType, CreateTreeMemberInput, UpdateTreeMemberInput, CollaboratorRole } from "@/types/database";
 
 const TreeView = () => {
   const { treeId } = useParams<{ treeId: string }>();
   const { data: tree, isLoading: treeLoading } = useFamilyTree(treeId);
   const { members, isLoading: membersLoading, createMember, updateMember, deleteMember } = useTreeMembers(treeId);
   const { relationships, createRelationship } = useRelationships(treeId);
+  const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
+  const { user } = useAuth();
+
+  const isOwner = tree?.owner_user_id === user?.id;
 
   const [zoom, setZoom] = useState(1);
   const [selectedPerson, setSelectedPerson] = useState<TreeMember | null>(null);
   const [showPersonForm, setShowPersonForm] = useState(false);
   const [showRelationshipForm, setShowRelationshipForm] = useState(false);
   const [showPersonDetail, setShowPersonDetail] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [showCollaboratorList, setShowCollaboratorList] = useState(false);
   const [editingPerson, setEditingPerson] = useState<TreeMember | null>(null);
   const [defaultRelationType, setDefaultRelationType] = useState<RelationshipType>("parent");
 
@@ -72,6 +82,15 @@ const TreeView = () => {
   const handleRelationshipSubmit = async (data: Parameters<typeof createRelationship.mutateAsync>[0]) => {
     await createRelationship.mutateAsync(data);
     setShowRelationshipForm(false);
+  };
+
+  const handleInviteSubmit = async (data: { email: string; role: CollaboratorRole }) => {
+    if (!treeId) return;
+    await sendInvite.mutateAsync({
+      family_tree_id: treeId,
+      email: data.email,
+      role: data.role,
+    });
   };
 
   // Calculate positions for tree visualization
@@ -144,7 +163,11 @@ const TreeView = () => {
                 Photos
               </Button>
             </Link>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowCollaboratorList(true)}
+            >
               <Users className="w-4 h-4 mr-2" />
               Invite
             </Button>
@@ -301,6 +324,28 @@ const TreeView = () => {
         onDelete={handleDeletePerson}
         onAddRelationship={handleAddRelationship}
         isDeleting={deleteMember.isPending}
+      />
+
+      <InviteCollaboratorDialog
+        open={showInviteDialog}
+        onOpenChange={setShowInviteDialog}
+        treeId={treeId || ""}
+        onSubmit={handleInviteSubmit}
+        isLoading={sendInvite.isPending}
+      />
+
+      <CollaboratorList
+        open={showCollaboratorList}
+        onOpenChange={setShowCollaboratorList}
+        collaborators={collaborators}
+        onUpdateRole={(id, role) => updateCollaboratorRole.mutate({ id, role })}
+        onRemove={(id) => removeCollaborator.mutate(id)}
+        onResendInvite={(collaborator) => resendInvite.mutate(collaborator)}
+        onInviteClick={() => {
+          setShowCollaboratorList(false);
+          setShowInviteDialog(true);
+        }}
+        isOwner={isOwner}
       />
     </div>
   );
