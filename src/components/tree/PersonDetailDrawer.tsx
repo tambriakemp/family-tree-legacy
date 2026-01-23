@@ -3,11 +3,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   User, Edit, Trash2, Plus, Heart, Users, 
-  Calendar, Image, FileText, ArrowUp, ArrowDown 
+  Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send
 } from "lucide-react";
-import type { TreeMember, Relationship, RelationshipType } from "@/types/database";
+import type { TreeMember, Relationship, RelationshipType, PhotoWithTags } from "@/types/database";
 import { format } from "date-fns";
 import {
   AlertDialog,
@@ -19,6 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { usePersonNotes } from "@/hooks/usePersonNotes";
+import { usePersonPhotos } from "@/hooks/usePhotos";
 
 interface PersonDetailDrawerProps {
   open: boolean;
@@ -52,6 +55,10 @@ export function PersonDetailDrawer({
   isDeleting,
 }: PersonDetailDrawerProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [newNote, setNewNote] = useState("");
+  
+  const { notes, isLoading: notesLoading, createNote, deleteNote } = usePersonNotes(person?.id);
+  const { data: personPhotos, isLoading: photosLoading } = usePersonPhotos(person?.id, person?.family_tree_id);
 
   if (!person) return null;
 
@@ -275,35 +282,94 @@ export function PersonDetailDrawer({
             </TabsContent>
 
             <TabsContent value="notes" className="mt-4">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium">Notes</h4>
-                <Button size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <Textarea
+                    placeholder={`Add a note about ${person.first_name}...`}
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    className="min-h-[80px]"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    if (newNote.trim() && person) {
+                      await createNote.mutateAsync({ person_id: person.id, content: newNote });
+                      setNewNote("");
+                    }
+                  }}
+                  disabled={!newNote.trim() || createNote.isPending}
+                >
+                  {createNote.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4 mr-2" />
+                  )}
                   Add Note
                 </Button>
-              </div>
-              <div className="text-center py-8">
-                <FileText className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  No notes yet. Add memories and stories about {person.first_name}.
-                </p>
+                
+                {notesLoading ? (
+                  <div className="flex justify-center py-4">
+                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  </div>
+                ) : notes.length === 0 ? (
+                  <div className="text-center py-8">
+                    <FileText className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                    <p className="text-sm text-muted-foreground">
+                      No notes yet. Add memories and stories about {person.first_name}.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {notes.map((note) => (
+                      <div key={note.id} className="p-3 rounded-lg bg-muted/50 border border-border">
+                        <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(note.created_at), "MMM d, yyyy")}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-destructive"
+                            onClick={() => deleteNote.mutateAsync(note.id)}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </TabsContent>
 
             <TabsContent value="photos" className="mt-4">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-medium">Photos</h4>
-                <Button size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Photo
-                </Button>
-              </div>
-              <div className="text-center py-8">
-                <Image className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-sm text-muted-foreground">
-                  No photos yet. Upload photos of {person.first_name}.
-                </p>
-              </div>
+              {photosLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : personPhotos && personPhotos.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2">
+                  {personPhotos.map((photo) => (
+                    <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={photo.url}
+                        alt={photo.caption || "Photo"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Image className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    No photos yet. Upload photos of {person.first_name} in the gallery and tag them.
+                  </p>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </SheetContent>
