@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, Loader2, Calendar, Image } from "lucide-react";
+import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, Loader2, Calendar, Image, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFamilyTree } from "@/hooks/useFamilyTrees";
 import { useTreeMembers } from "@/hooks/useTreeMembers";
@@ -15,7 +15,9 @@ import { PersonDetailDrawer } from "@/components/tree/PersonDetailDrawer";
 import { InviteCollaboratorDialog } from "@/components/collaborators/InviteCollaboratorDialog";
 import { CollaboratorList } from "@/components/collaborators/CollaboratorList";
 import { TreeConnections } from "@/components/tree/TreeConnections";
+import { TreeMinimap } from "@/components/tree/TreeMinimap";
 import { useTreeLayout } from "@/components/tree/useTreeLayout";
+import { useTreePan } from "@/components/tree/useTreePan";
 import type { TreeMember, RelationshipType, CreateTreeMemberInput, UpdateTreeMemberInput, CollaboratorRole } from "@/types/database";
 
 const TreeView = () => {
@@ -37,11 +39,52 @@ const TreeView = () => {
   const [showCollaboratorList, setShowCollaboratorList] = useState(false);
   const [editingPerson, setEditingPerson] = useState<TreeMember | null>(null);
   const [defaultRelationType, setDefaultRelationType] = useState<RelationshipType>("parent");
+  const [viewportSize, setViewportSize] = useState({ width: 800, height: 600 });
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  // Use hierarchical tree layout
+  const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
+    members,
+    relationships
+  );
+
+  // Pan/drag functionality
+  const {
+    pan,
+    isPanning,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleMouseLeave,
+    handleWheel,
+    setPan,
+    resetPan,
+  } = useTreePan(zoom, svgWidth, svgHeight);
+
+  // Track viewport size for minimap
+  useEffect(() => {
+    const updateViewportSize = () => {
+      if (canvasRef.current) {
+        setViewportSize({
+          width: canvasRef.current.clientWidth,
+          height: canvasRef.current.clientHeight,
+        });
+      }
+    };
+    
+    updateViewportSize();
+    window.addEventListener("resize", updateViewportSize);
+    return () => window.removeEventListener("resize", updateViewportSize);
+  }, []);
 
   const isLoading = treeLoading || membersLoading;
 
   const handleZoomIn = () => setZoom((z) => Math.min(z + 0.2, 2));
   const handleZoomOut = () => setZoom((z) => Math.max(z - 0.2, 0.5));
+  const handleResetView = () => {
+    setZoom(1);
+    resetPan();
+  };
 
   const handleAddPerson = () => {
     setEditingPerson(null);
@@ -94,12 +137,6 @@ const TreeView = () => {
       role: data.role,
     });
   };
-
-  // Use hierarchical tree layout
-  const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
-    members,
-    relationships
-  );
 
   if (isLoading) {
     return (
@@ -156,7 +193,17 @@ const TreeView = () => {
 
       {/* Tree Canvas */}
       <main className="pt-16 h-screen overflow-hidden">
-        <div className="relative w-full h-full bg-gradient-hero overflow-auto">
+        <div 
+          ref={canvasRef}
+          className={`relative w-full h-full bg-gradient-hero overflow-hidden ${
+            isPanning ? "cursor-grabbing" : "cursor-grab"
+          }`}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseLeave}
+          onWheel={handleWheel}
+        >
           {/* Zoom controls */}
           <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-10">
             <Button
@@ -164,6 +211,7 @@ const TreeView = () => {
               size="icon"
               className="bg-card shadow-soft"
               onClick={handleZoomIn}
+              title="Zoom in"
             >
               <ZoomIn className="w-4 h-4" />
             </Button>
@@ -172,17 +220,46 @@ const TreeView = () => {
               size="icon"
               className="bg-card shadow-soft"
               onClick={handleZoomOut}
+              title="Zoom out"
             >
               <ZoomOut className="w-4 h-4" />
             </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              className="bg-card shadow-soft"
+              onClick={handleResetView}
+              title="Reset view"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </Button>
           </div>
+
+          {/* Minimap */}
+          {members.length > 0 && (
+            <TreeMinimap
+              nodePositions={nodePositions}
+              connections={connections}
+              svgWidth={svgWidth}
+              svgHeight={svgHeight}
+              viewportWidth={viewportSize.width}
+              viewportHeight={viewportSize.height}
+              pan={pan}
+              zoom={zoom}
+              onNavigate={setPan}
+            />
+          )}
 
           {/* Tree Visualization */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="w-full min-h-full flex items-start justify-center p-8"
-            style={{ transform: `scale(${zoom})`, transformOrigin: "top center" }}
+            style={{ 
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, 
+              transformOrigin: "top center",
+              userSelect: isPanning ? "none" : "auto",
+            }}
           >
             {members.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[60vh] text-center">
