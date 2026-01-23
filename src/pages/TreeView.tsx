@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, Loader2, Calendar, Image } from "lucide-react";
@@ -14,6 +14,8 @@ import { RelationshipFormDialog } from "@/components/tree/RelationshipFormDialog
 import { PersonDetailDrawer } from "@/components/tree/PersonDetailDrawer";
 import { InviteCollaboratorDialog } from "@/components/collaborators/InviteCollaboratorDialog";
 import { CollaboratorList } from "@/components/collaborators/CollaboratorList";
+import { TreeConnections } from "@/components/tree/TreeConnections";
+import { useTreeLayout } from "@/components/tree/useTreeLayout";
 import type { TreeMember, RelationshipType, CreateTreeMemberInput, UpdateTreeMemberInput, CollaboratorRole } from "@/types/database";
 
 const TreeView = () => {
@@ -93,38 +95,11 @@ const TreeView = () => {
     });
   };
 
-  // Calculate positions for tree visualization
-  const calculateNodePositions = useCallback(() => {
-    if (members.length === 0) return [];
-    
-    const nodeWidth = 160;
-    const nodeHeight = 80;
-    const horizontalGap = 40;
-    const verticalGap = 60;
-    
-    const nodesPerRow = Math.ceil(Math.sqrt(members.length));
-    
-    return members.map((member, index) => {
-      const row = Math.floor(index / nodesPerRow);
-      const col = index % nodesPerRow;
-      const rowMemberCount = Math.min(nodesPerRow, members.length - row * nodesPerRow);
-      const rowWidth = rowMemberCount * nodeWidth + (rowMemberCount - 1) * horizontalGap;
-      const startX = (800 - rowWidth) / 2;
-      
-      return {
-        member,
-        x: startX + col * (nodeWidth + horizontalGap),
-        y: 50 + row * (nodeHeight + verticalGap),
-      };
-    });
-  }, [members]);
-
-  const nodePositions = calculateNodePositions();
-
-  // Calculate SVG viewBox height based on content
-  const svgHeight = Math.max(500, nodePositions.length > 0 
-    ? Math.max(...nodePositions.map(n => n.y)) + 130 
-    : 500);
+  // Use hierarchical tree layout
+  const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
+    members,
+    relationships
+  );
 
   if (isLoading) {
     return (
@@ -228,53 +203,13 @@ const TreeView = () => {
               </div>
             ) : (
               <svg
-                className="w-full max-w-4xl"
-                viewBox={`0 0 800 ${svgHeight}`}
+                className="w-full"
+                viewBox={`0 0 ${svgWidth} ${svgHeight}`}
                 preserveAspectRatio="xMidYMin meet"
+                style={{ minWidth: Math.min(svgWidth, 1200), minHeight: svgHeight }}
               >
-                {/* Relationship lines */}
-                {relationships.map((rel) => {
-                  const fromNode = nodePositions.find(
-                    (n) => n.member.id === rel.from_person_id
-                  );
-                  const toNode = nodePositions.find(
-                    (n) => n.member.id === rel.to_person_id
-                  );
-                  if (!fromNode || !toNode) return null;
-
-                  const fromX = fromNode.x + 80;
-                  const fromY = fromNode.y + 80;
-                  const toX = toNode.x + 80;
-                  const toY = toNode.y;
-
-                  const isSpouse = rel.relationship_type === "spouse" || rel.relationship_type === "partner";
-
-                  return (
-                    <g key={rel.id}>
-                      <path
-                        d={
-                          isSpouse
-                            ? `M${fromNode.x + 160} ${fromNode.y + 40} L${toNode.x} ${toNode.y + 40}`
-                            : `M${fromX} ${fromY} L${fromX} ${(fromY + toY) / 2} L${toX} ${(fromY + toY) / 2} L${toX} ${toY}`
-                        }
-                        className="tree-connector"
-                        strokeWidth={isSpouse ? 2 : 3}
-                        strokeDasharray={isSpouse ? "5,5" : undefined}
-                        fill="none"
-                      />
-                      {rel.by_marriage && isSpouse && (
-                        <text
-                          x={(fromNode.x + 160 + toNode.x) / 2}
-                          y={fromNode.y + 32}
-                          className="fill-muted-foreground text-[10px]"
-                          textAnchor="middle"
-                        >
-                          by marriage
-                        </text>
-                      )}
-                    </g>
-                  );
-                })}
+                {/* Relationship connections */}
+                <TreeConnections connections={connections} />
 
                 {/* Person nodes */}
                 {nodePositions.map(({ member, x, y }) => (
