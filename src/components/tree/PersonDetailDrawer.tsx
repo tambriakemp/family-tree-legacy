@@ -1,0 +1,335 @@
+import { useState } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { 
+  User, Edit, Trash2, Plus, Heart, Users, 
+  Calendar, Image, FileText, ArrowUp, ArrowDown 
+} from "lucide-react";
+import type { TreeMember, Relationship, RelationshipType } from "@/types/database";
+import { format } from "date-fns";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+interface PersonDetailDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  person: TreeMember | null;
+  relationships: Relationship[];
+  members: TreeMember[];
+  onEdit: () => void;
+  onDelete: () => void;
+  onAddRelationship: (type: RelationshipType) => void;
+  isDeleting?: boolean;
+}
+
+const relationshipLabels: Record<RelationshipType, string> = {
+  parent: "Parent",
+  child: "Child",
+  spouse: "Spouse",
+  sibling: "Sibling",
+  partner: "Partner",
+};
+
+export function PersonDetailDrawer({
+  open,
+  onOpenChange,
+  person,
+  relationships,
+  members,
+  onEdit,
+  onDelete,
+  onAddRelationship,
+  isDeleting,
+}: PersonDetailDrawerProps) {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  if (!person) return null;
+
+  const fullName = `${person.first_name}${person.last_name ? ` ${person.last_name}` : ""}`;
+
+  const getRelatedPerson = (personId: string) => {
+    return members.find((m) => m.id === personId);
+  };
+
+  const personRelationships = relationships.filter(
+    (r) => r.from_person_id === person.id || r.to_person_id === person.id
+  );
+
+  const handleConfirmDelete = () => {
+    setShowDeleteDialog(false);
+    onDelete();
+  };
+
+  return (
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="text-left pb-4 border-b border-border">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-full bg-sage-light flex items-center justify-center flex-shrink-0">
+                {person.profile_photo_url ? (
+                  <img
+                    src={person.profile_photo_url}
+                    alt={fullName}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                ) : (
+                  <User className="w-8 h-8 text-primary/60" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <SheetTitle className="font-display text-xl">{fullName}</SheetTitle>
+                <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
+                  <Calendar className="w-4 h-4" />
+                  {person.birth_date ? (
+                    <span>
+                      {format(new Date(person.birth_date), "MMM d, yyyy")}
+                      {person.death_date && (
+                        <> – {format(new Date(person.death_date), "MMM d, yyyy")}</>
+                      )}
+                    </span>
+                  ) : (
+                    <span>No birth date set</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-4">
+              <Button variant="outline" size="sm" onClick={onEdit}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-destructive hover:text-destructive"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          </SheetHeader>
+
+          <Tabs defaultValue="overview" className="mt-6">
+            <TabsList className="w-full">
+              <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
+              <TabsTrigger value="relationships" className="flex-1">Relationships</TabsTrigger>
+              <TabsTrigger value="notes" className="flex-1">Notes</TabsTrigger>
+              <TabsTrigger value="photos" className="flex-1">Photos</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="mt-4 space-y-6">
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                  Quick Actions
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="justify-start"
+                    onClick={() => onAddRelationship("parent")}
+                  >
+                    <ArrowUp className="w-4 h-4 mr-2" />
+                    Add Parent
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="justify-start"
+                    onClick={() => onAddRelationship("child")}
+                  >
+                    <ArrowDown className="w-4 h-4 mr-2" />
+                    Add Child
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="justify-start"
+                    onClick={() => onAddRelationship("spouse")}
+                  >
+                    <Heart className="w-4 h-4 mr-2" />
+                    Add Spouse
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="justify-start"
+                    onClick={() => onAddRelationship("sibling")}
+                  >
+                    <Users className="w-4 h-4 mr-2" />
+                    Add Sibling
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-3">
+                  Relationships ({personRelationships.length})
+                </h4>
+                {personRelationships.length === 0 ? (
+                  <p className="text-sm text-muted-foreground italic">
+                    No relationships defined yet
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {personRelationships.slice(0, 4).map((rel) => {
+                      const relatedId =
+                        rel.from_person_id === person.id
+                          ? rel.to_person_id
+                          : rel.from_person_id;
+                      const related = getRelatedPerson(relatedId);
+                      if (!related) return null;
+                      
+                      return (
+                        <div
+                          key={rel.id}
+                          className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-sage-light flex items-center justify-center">
+                              <User className="w-4 h-4 text-primary/60" />
+                            </div>
+                            <span className="text-sm font-medium">
+                              {related.first_name} {related.last_name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {rel.by_marriage && (
+                              <Badge variant="secondary" className="text-xs">
+                                by marriage
+                              </Badge>
+                            )}
+                            <Badge variant="outline">
+                              {relationshipLabels[rel.relationship_type]}
+                            </Badge>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="relationships" className="mt-4">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-medium">All Relationships</h4>
+                <Button size="sm" onClick={() => onAddRelationship("parent")}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add
+                </Button>
+              </div>
+              {personRelationships.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    No relationships yet. Add parents, children, or spouse.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {personRelationships.map((rel) => {
+                    const relatedId =
+                      rel.from_person_id === person.id
+                        ? rel.to_person_id
+                        : rel.from_person_id;
+                    const related = getRelatedPerson(relatedId);
+                    if (!related) return null;
+
+                    return (
+                      <div
+                        key={rel.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-border"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-sage-light flex items-center justify-center">
+                            <User className="w-5 h-5 text-primary/60" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {related.first_name} {related.last_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {relationshipLabels[rel.relationship_type]}
+                              {rel.by_marriage && " (by marriage)"}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="notes" className="mt-4">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-medium">Notes</h4>
+                <Button size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Note
+                </Button>
+              </div>
+              <div className="text-center py-8">
+                <FileText className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  No notes yet. Add memories and stories about {person.first_name}.
+                </p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="photos" className="mt-4">
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="font-medium">Photos</h4>
+                <Button size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Photo
+                </Button>
+              </div>
+              <div className="text-center py-8">
+                <Image className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  No photos yet. Upload photos of {person.first_name}.
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </SheetContent>
+      </Sheet>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {fullName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this person and all their relationships
+              from the family tree. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
