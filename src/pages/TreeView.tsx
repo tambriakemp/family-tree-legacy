@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, Loader2, Calendar, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFamilyTree } from "@/hooks/useFamilyTrees";
 import { useTreeMembers } from "@/hooks/useTreeMembers";
@@ -132,6 +132,18 @@ const TreeView = () => {
             </h1>
           </div>
           <div className="flex items-center gap-2">
+            <Link to={`/trees/${treeId}/calendar`}>
+              <Button variant="outline" size="sm">
+                <Calendar className="w-4 h-4 mr-2" />
+                Calendar
+              </Button>
+            </Link>
+            <Link to={`/trees/${treeId}/gallery`}>
+              <Button variant="outline" size="sm">
+                <Image className="w-4 h-4 mr-2" />
+                Photos
+              </Button>
+            </Link>
             <Button variant="outline" size="sm">
               <Users className="w-4 h-4 mr-2" />
               Invite

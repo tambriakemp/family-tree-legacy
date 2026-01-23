@@ -88,6 +88,10 @@ export interface PhotoTag {
   created_at: string;
 }
 
+export interface PhotoWithTags extends Photo {
+  photo_tags: PhotoTag[];
+}
+
 export interface CalendarEvent {
   id: string;
   family_tree_id: string;
@@ -130,4 +134,33 @@ export interface CreateRelationshipInput {
 export interface CreateFamilyTreeInput {
   title: string;
   description?: string;
+}
+
+export interface CreateCalendarEventInput {
+  family_tree_id: string;
+  title: string;
+  description?: string;
+  start_date_time: string;
+  end_date_time?: string;
+  related_person_id?: string;
+}
+
+export interface UpdateCalendarEventInput {
+  title?: string;
+  description?: string | null;
+  start_date_time?: string;
+  end_date_time?: string | null;
+  related_person_id?: string | null;
+}
+
+export interface CreatePhotoInput {
+  family_tree_id: string;
+  storage_path: string;
+  url: string;
+  caption?: string;
+}
+
+export interface CreatePersonNoteInput {
+  person_id: string;
+  content: string;
 }
