@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, TreeDeciduous, Users, LogOut, Loader2, MoreVertical, Trash2, Edit } from "lucide-react";
+import { Plus, TreeDeciduous, LogOut, Loader2, MoreVertical, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
@@ -32,13 +32,16 @@ const Dashboard = () => {
   const { user, isLoading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { trees, isLoading: treesLoading, createTree, deleteTree } = useFamilyTrees();
-  const { pendingInvites, isLoading: invitesLoading, acceptInvite, declineInvite } = usePendingInvites();
+  const { pendingInvites, acceptInvite, declineInvite } = usePendingInvites();
   const [searchParams] = useSearchParams();
   
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [treeToDelete, setTreeToDelete] = useState<string | null>(null);
   
-  // Debug state for RLS investigation
+  // Show debug panel only when ?debug=1 is present
+  const showDebug = searchParams.get("debug") === "1";
+  
+  // Debug state for RLS investigation (only load when needed)
   const [debugInfo, setDebugInfo] = useState<{
     sessionUserId: string | null;
     dbAuthUid: string | null;
@@ -47,11 +50,11 @@ const Dashboard = () => {
     error: string | null;
   } | null>(null);
 
-  // Debug function to check what Postgres sees
+  // Debug function to check what Postgres sees (only when debug mode is active)
   useEffect(() => {
+    if (!showDebug || !user) return;
+    
     const checkDebugContext = async () => {
-      if (!user) return;
-      
       const { supabase } = await import("@/integrations/supabase/client");
       const { data: session } = await supabase.auth.getSession();
       
@@ -67,7 +70,7 @@ const Dashboard = () => {
     };
     
     checkDebugContext();
-  }, [user]);
+  }, [user, showDebug]);
 
   // Handle invite deep link
   useEffect(() => {
@@ -130,8 +133,8 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {/* DEBUG: RLS Investigation Panel - Remove after fixing */}
-        {debugInfo && (
+        {/* DEBUG: RLS Investigation Panel - Only visible with ?debug=1 */}
+        {showDebug && debugInfo && (
           <div className="mb-6 p-4 rounded-lg border border-accent bg-accent/10">
             <h3 className="font-semibold text-accent-foreground mb-2">🔍 RLS Debug Info</h3>
             <div className="text-sm font-mono space-y-1">

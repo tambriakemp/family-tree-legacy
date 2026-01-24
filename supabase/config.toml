@@ -2,3 +2,18 @@ project_id = "luueoiwazlmskrtvfpgw"
 
 [functions.send-invite]
 verify_jwt = false
+
+[functions.family-trees-create]
+verify_jwt = false
+
+[functions.family-trees-list]
+verify_jwt = false
+
+[functions.family-trees-get]
+verify_jwt = false
+
+[functions.family-trees-update]
+verify_jwt = false
+
+[functions.family-trees-delete]
+verify_jwt = false
