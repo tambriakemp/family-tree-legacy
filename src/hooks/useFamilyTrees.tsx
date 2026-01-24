@@ -25,12 +25,15 @@ export function useFamilyTrees() {
 
   const createTree = useMutation({
     mutationFn: async (input: CreateFamilyTreeInput) => {
+      if (!user) {
+        throw new Error("You must be logged in to create a tree");
+      }
       const { data, error } = await supabase
         .from("family_trees")
         .insert({
           title: input.title,
           description: input.description || null,
-          owner_user_id: user?.id,
+          owner_user_id: user.id,
         })
         .select()
         .single();
