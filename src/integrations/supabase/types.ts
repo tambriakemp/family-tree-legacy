@@ -419,6 +419,14 @@ export type Database = {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
       }
+      debug_request_context: {
+        Args: never
+        Returns: {
+          auth_uid: string
+          jwt_role: string
+          jwt_sub: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
