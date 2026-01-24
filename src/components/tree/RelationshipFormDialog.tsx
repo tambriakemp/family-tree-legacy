@@ -15,6 +15,7 @@ interface RelationshipFormDialogProps {
   onSubmit: (data: CreateRelationshipInput) => void;
   isLoading?: boolean;
   existingRelationships?: { from_person_id: string; to_person_id: string }[];
+  defaultRelationType?: RelationshipType;
 }
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
@@ -34,18 +35,19 @@ export function RelationshipFormDialog({
   onSubmit,
   isLoading,
   existingRelationships = [],
+  defaultRelationType,
 }: RelationshipFormDialogProps) {
   const [toPersonId, setToPersonId] = useState("");
-  const [relationshipType, setRelationshipType] = useState<RelationshipType>("parent");
+  const [relationshipType, setRelationshipType] = useState<RelationshipType>(defaultRelationType || "parent");
   const [byMarriage, setByMarriage] = useState(false);
 
   useEffect(() => {
     if (open) {
       setToPersonId("");
-      setRelationshipType("parent");
+      setRelationshipType(defaultRelationType || "parent");
       setByMarriage(false);
     }
-  }, [open]);
+  }, [open, defaultRelationType]);
 
   const availableMembers = members.filter((m) => {
     if (!fromPerson) return true;

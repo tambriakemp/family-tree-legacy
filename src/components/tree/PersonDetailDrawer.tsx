@@ -33,6 +33,8 @@ interface PersonDetailDrawerProps {
   onDelete: () => void;
   onAddRelationship: (type: RelationshipType) => void;
   isDeleting?: boolean;
+  onDeleteRelationship: (id: string) => void;
+  isDeletingRelationship?: boolean;
 }
 
 const relationshipLabels: Record<RelationshipType, string> = {
@@ -53,8 +55,11 @@ export function PersonDetailDrawer({
   onDelete,
   onAddRelationship,
   isDeleting,
+  onDeleteRelationship,
+  isDeletingRelationship,
 }: PersonDetailDrawerProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteRelDialog, setShowDeleteRelDialog] = useState<string | null>(null);
   const [newNote, setNewNote] = useState("");
   
   const { notes, isLoading: notesLoading, createNote, deleteNote } = usePersonNotes(person?.id);
@@ -274,6 +279,14 @@ export function PersonDetailDrawer({
                             </p>
                           </div>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={() => setShowDeleteRelDialog(rel.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     );
                   })}
@@ -392,6 +405,32 @@ export function PersonDetailDrawer({
               disabled={isDeleting}
             >
               {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!showDeleteRelDialog} onOpenChange={(open) => !open && setShowDeleteRelDialog(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Relationship?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the relationship between these two people. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (showDeleteRelDialog) {
+                  onDeleteRelationship(showDeleteRelDialog);
+                  setShowDeleteRelDialog(null);
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeletingRelationship}
+            >
+              {isDeletingRelationship ? "Removing..." : "Remove"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
