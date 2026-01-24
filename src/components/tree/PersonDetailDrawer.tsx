@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   User, Edit, Trash2, Plus, Heart, Users, 
   Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send
@@ -20,6 +23,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { usePersonNotes } from "@/hooks/usePersonNotes";
 import { usePersonPhotos } from "@/hooks/usePhotos";
 
@@ -35,6 +46,8 @@ interface PersonDetailDrawerProps {
   isDeleting?: boolean;
   onDeleteRelationship: (id: string) => void;
   isDeletingRelationship?: boolean;
+  onUpdateRelationship: (data: { id: string; relationship_type?: RelationshipType; by_marriage?: boolean }) => void;
+  isUpdatingRelationship?: boolean;
 }
 
 const relationshipLabels: Record<RelationshipType, string> = {
@@ -44,6 +57,14 @@ const relationshipLabels: Record<RelationshipType, string> = {
   sibling: "Sibling",
   partner: "Partner",
 };
+
+const relationshipTypes: { value: RelationshipType; label: string }[] = [
+  { value: "parent", label: "Parent" },
+  { value: "child", label: "Child" },
+  { value: "spouse", label: "Spouse" },
+  { value: "sibling", label: "Sibling" },
+  { value: "partner", label: "Partner" },
+];
 
 export function PersonDetailDrawer({
   open,
@@ -57,9 +78,14 @@ export function PersonDetailDrawer({
   isDeleting,
   onDeleteRelationship,
   isDeletingRelationship,
+  onUpdateRelationship,
+  isUpdatingRelationship,
 }: PersonDetailDrawerProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteRelDialog, setShowDeleteRelDialog] = useState<string | null>(null);
+  const [editingRelationship, setEditingRelationship] = useState<Relationship | null>(null);
+  const [editRelType, setEditRelType] = useState<RelationshipType>("parent");
+  const [editByMarriage, setEditByMarriage] = useState(false);
   const [newNote, setNewNote] = useState("");
   
   const { notes, isLoading: notesLoading, createNote, deleteNote } = usePersonNotes(person?.id);
@@ -81,6 +107,23 @@ export function PersonDetailDrawer({
     setShowDeleteDialog(false);
     onDelete();
   };
+
+  const handleEditRelationship = (rel: Relationship) => {
+    setEditingRelationship(rel);
+    setEditRelType(rel.relationship_type);
+    setEditByMarriage(rel.by_marriage || false);
+  };
+
+  const handleSaveRelationship = () => {
+    if (!editingRelationship) return;
+    onUpdateRelationship({
+      id: editingRelationship.id,
+      relationship_type: editRelType,
+      by_marriage: editByMarriage,
+    });
+    setEditingRelationship(null);
+  };
+
 
   return (
     <>
@@ -279,14 +322,24 @@ export function PersonDetailDrawer({
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => setShowDeleteRelDialog(rel.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleEditRelationship(rel)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => setShowDeleteRelDialog(rel.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     );
                   })}
@@ -435,6 +488,61 @@ export function PersonDetailDrawer({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!editingRelationship} onOpenChange={(open) => !open && setEditingRelationship(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Relationship</DialogTitle>
+            <DialogDescription>
+              Update the relationship type or "by marriage" status.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Relationship Type</Label>
+              <Select
+                value={editRelType}
+                onValueChange={(value) => setEditRelType(value as RelationshipType)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select relationship type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {relationshipTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(editRelType === "spouse" || editRelType === "partner") && (
+              <div className="flex items-center justify-between rounded-lg border border-border p-4">
+                <div className="space-y-0.5">
+                  <Label htmlFor="editByMarriage">By Marriage</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Mark this relationship as "by marriage"
+                  </p>
+                </div>
+                <Switch
+                  id="editByMarriage"
+                  checked={editByMarriage}
+                  onCheckedChange={setEditByMarriage}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingRelationship(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveRelationship} disabled={isUpdatingRelationship}>
+              {isUpdatingRelationship ? "Saving..." : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

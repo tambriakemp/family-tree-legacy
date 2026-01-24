@@ -24,7 +24,7 @@ const TreeView = () => {
   const { treeId } = useParams<{ treeId: string }>();
   const { data: tree, isLoading: treeLoading } = useFamilyTree(treeId);
   const { members, isLoading: membersLoading, createMember, updateMember, deleteMember } = useTreeMembers(treeId);
-  const { relationships, createRelationship, deleteRelationship } = useRelationships(treeId);
+  const { relationships, createRelationship, deleteRelationship, updateRelationship } = useRelationships(treeId);
   const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
   const { user } = useAuth();
 
@@ -131,6 +131,14 @@ const TreeView = () => {
 
   const handleDeleteRelationship = async (id: string) => {
     await deleteRelationship.mutateAsync(id);
+  };
+
+  const handleUpdateRelationship = async (data: { 
+    id: string; 
+    relationship_type?: "parent" | "child" | "spouse" | "sibling" | "partner"; 
+    by_marriage?: boolean 
+  }) => {
+    await updateRelationship.mutateAsync(data);
   };
 
   const handleInviteSubmit = async (data: { email: string; role: CollaboratorRole }) => {
@@ -343,6 +351,8 @@ const TreeView = () => {
         isDeleting={deleteMember.isPending}
         onDeleteRelationship={handleDeleteRelationship}
         isDeletingRelationship={deleteRelationship.isPending}
+        onUpdateRelationship={handleUpdateRelationship}
+        isUpdatingRelationship={updateRelationship.isPending}
       />
 
       <InviteCollaboratorDialog
