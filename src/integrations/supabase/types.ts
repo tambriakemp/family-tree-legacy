@@ -256,6 +256,7 @@ export type Database = {
           id: string
           relationship_type: Database["public"]["Enums"]["relationship_type"]
           to_person_id: string
+          updated_at: string
         }
         Insert: {
           by_marriage?: boolean | null
@@ -266,6 +267,7 @@ export type Database = {
           id?: string
           relationship_type: Database["public"]["Enums"]["relationship_type"]
           to_person_id: string
+          updated_at?: string
         }
         Update: {
           by_marriage?: boolean | null
@@ -276,6 +278,7 @@ export type Database = {
           id?: string
           relationship_type?: Database["public"]["Enums"]["relationship_type"]
           to_person_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
