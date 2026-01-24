@@ -12,13 +12,13 @@ export function useFamilyTrees() {
     queryKey: ["family-trees"],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
-        .from("family_trees")
-        .select("*")
-        .order("created_at", { ascending: false });
       
-      if (error) throw error;
-      return data as FamilyTree[];
+      const { data, error } = await supabase.functions.invoke("family-trees-list");
+      
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      
+      return (data?.data || []) as FamilyTree[];
     },
     enabled: !!user,
   });
@@ -28,18 +28,18 @@ export function useFamilyTrees() {
       if (!user) {
         throw new Error("You must be logged in to create a tree");
       }
-      const { data, error } = await supabase
-        .from("family_trees")
-        .insert({
+      
+      const { data, error } = await supabase.functions.invoke("family-trees-create", {
+        body: {
           title: input.title,
           description: input.description || null,
-          owner_user_id: user.id,
-        })
-        .select()
-        .single();
+        },
+      });
       
-      if (error) throw error;
-      return data as FamilyTree;
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      
+      return data.data as FamilyTree;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["family-trees"] });
@@ -52,15 +52,18 @@ export function useFamilyTrees() {
 
   const updateTree = useMutation({
     mutationFn: async ({ id, ...input }: Partial<CreateFamilyTreeInput> & { id: string }) => {
-      const { data, error } = await supabase
-        .from("family_trees")
-        .update(input)
-        .eq("id", id)
-        .select()
-        .single();
+      const { data, error } = await supabase.functions.invoke("family-trees-update", {
+        body: {
+          id,
+          title: input.title,
+          description: input.description,
+        },
+      });
       
-      if (error) throw error;
-      return data as FamilyTree;
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      
+      return data.data as FamilyTree;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["family-trees"] });
@@ -73,12 +76,12 @@ export function useFamilyTrees() {
 
   const deleteTree = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("family_trees")
-        .delete()
-        .eq("id", id);
+      const { data, error } = await supabase.functions.invoke("family-trees-delete", {
+        body: { id },
+      });
       
-      if (error) throw error;
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["family-trees"] });
@@ -106,14 +109,15 @@ export function useFamilyTree(treeId: string | undefined) {
     queryKey: ["family-tree", treeId],
     queryFn: async () => {
       if (!treeId) return null;
-      const { data, error } = await supabase
-        .from("family_trees")
-        .select("*")
-        .eq("id", treeId)
-        .single();
       
-      if (error) throw error;
-      return data as FamilyTree;
+      const { data, error } = await supabase.functions.invoke("family-trees-get", {
+        body: { treeId },
+      });
+      
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      
+      return data.data as FamilyTree;
     },
     enabled: !!treeId && !!user,
   });
