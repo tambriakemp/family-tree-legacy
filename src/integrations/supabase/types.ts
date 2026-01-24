@@ -419,6 +419,15 @@ export type Database = {
         Args: { _tree_id: string; _user_id: string }
         Returns: boolean
       }
+      debug_db_identity: {
+        Args: never
+        Returns: {
+          auth_uid: string
+          db_current_user: string
+          db_session_user: string
+          jwt_role: string
+        }[]
+      }
       debug_request_context: {
         Args: never
         Returns: {
