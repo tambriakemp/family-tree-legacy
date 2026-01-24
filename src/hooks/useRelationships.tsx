@@ -52,10 +52,22 @@ export function useRelationships(treeId: string | undefined) {
   });
 
   const updateRelationship = useMutation({
-    mutationFn: async ({ id, by_marriage }: { id: string; by_marriage: boolean }) => {
+    mutationFn: async ({ 
+      id, 
+      relationship_type, 
+      by_marriage 
+    }: { 
+      id: string; 
+      relationship_type?: "parent" | "child" | "spouse" | "sibling" | "partner"; 
+      by_marriage?: boolean 
+    }) => {
+      const updates: Record<string, unknown> = {};
+      if (relationship_type !== undefined) updates.relationship_type = relationship_type;
+      if (by_marriage !== undefined) updates.by_marriage = by_marriage;
+      
       const { data, error } = await supabase
         .from("relationships")
-        .update({ by_marriage })
+        .update(updates)
         .eq("id", id)
         .select()
         .single();
