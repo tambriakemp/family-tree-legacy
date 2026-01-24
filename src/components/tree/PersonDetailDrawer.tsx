@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   User, Edit, Trash2, Plus, Heart, Users, 
-  Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send
+  Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send, History, Clock
 } from "lucide-react";
 import type { TreeMember, Relationship, RelationshipType, PhotoWithTags } from "@/types/database";
 import { format } from "date-fns";
@@ -177,11 +177,12 @@ export function PersonDetailDrawer({
           </SheetHeader>
 
           <Tabs defaultValue="overview" className="mt-6">
-            <TabsList className="w-full">
-              <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-              <TabsTrigger value="relationships" className="flex-1">Relationships</TabsTrigger>
-              <TabsTrigger value="notes" className="flex-1">Notes</TabsTrigger>
-              <TabsTrigger value="photos" className="flex-1">Photos</TabsTrigger>
+            <TabsList className="w-full grid grid-cols-5">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="relationships">Relations</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="photos">Photos</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-4 space-y-6">
@@ -343,6 +344,73 @@ export function PersonDetailDrawer({
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-4">
+              <div className="flex items-center gap-2 mb-4">
+                <History className="w-5 h-5 text-muted-foreground" />
+                <h4 className="font-medium">Relationship History</h4>
+              </div>
+              {personRelationships.length === 0 ? (
+                <div className="text-center py-8">
+                  <History className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-sm text-muted-foreground">
+                    No relationship history yet. Add relationships to track changes.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {personRelationships
+                    .sort((a, b) => {
+                      const dateA = a.updated_at ? new Date(a.updated_at) : new Date(a.created_at);
+                      const dateB = b.updated_at ? new Date(b.updated_at) : new Date(b.created_at);
+                      return dateB.getTime() - dateA.getTime();
+                    })
+                    .map((rel) => {
+                      const relatedId =
+                        rel.from_person_id === person.id
+                          ? rel.to_person_id
+                          : rel.from_person_id;
+                      const related = getRelatedPerson(relatedId);
+                      if (!related) return null;
+
+                      const wasModified = rel.updated_at && rel.updated_at !== rel.created_at;
+
+                      return (
+                        <div
+                          key={rel.id}
+                          className="p-3 rounded-lg border border-border bg-muted/30"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="outline" className="text-xs">
+                              {relationshipLabels[rel.relationship_type]}
+                            </Badge>
+                            {rel.by_marriage && (
+                              <Badge variant="secondary" className="text-xs">
+                                by marriage
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm font-medium mb-2">
+                            {person.first_name} → {related.first_name} {related.last_name}
+                          </p>
+                          <div className="space-y-1 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-3 h-3" />
+                              <span>Created: {format(new Date(rel.created_at), "MMM d, yyyy 'at' h:mm a")}</span>
+                            </div>
+                            {wasModified && (
+                              <div className="flex items-center gap-2">
+                                <Edit className="w-3 h-3" />
+                                <span>Modified: {format(new Date(rel.updated_at!), "MMM d, yyyy 'at' h:mm a")}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
               )}
             </TabsContent>
