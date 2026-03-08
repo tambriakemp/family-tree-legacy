@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw } from "lucide-react";
+import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFamilyTree } from "@/hooks/useFamilyTrees";
 import { useTreeMembers } from "@/hooks/useTreeMembers";
@@ -41,6 +41,7 @@ const TreeView = () => {
   const [defaultRelationType, setDefaultRelationType] = useState<RelationshipType>("parent");
   const [viewportSize, setViewportSize] = useState({ width: 800, height: 600 });
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Use hierarchical tree layout
   const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
@@ -173,6 +174,24 @@ const TreeView = () => {
             <h1 className="font-display text-lg font-semibold">
               {tree?.title || "Family Tree"}
             </h1>
+          </div>
+          <div className="relative max-w-48">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search people..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-8 pl-8 pr-8 text-sm rounded-full border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Link to={`/trees/${treeId}/calendar`}>
@@ -344,16 +363,27 @@ const TreeView = () => {
                 <TreeConnections connections={connections} />
 
                 {/* Person nodes */}
-                {nodePositions.map(({ member, x, y }) => (
-                  <PersonNode
-                    key={member.id}
-                    person={member}
-                    x={x}
-                    y={y}
-                    isSelected={selectedPerson?.id === member.id}
-                    onClick={() => handlePersonClick(member)}
-                  />
-                ))}
+                {nodePositions.map(({ member, x, y }) => {
+                  const matches = searchQuery === "" || 
+                    member.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    (member.last_name && member.last_name.toLowerCase().includes(searchQuery.toLowerCase()));
+                  return (
+                    <g
+                      key={member.id}
+                      opacity={searchQuery === "" ? 1 : matches ? 1 : 0.3}
+                      transform={searchQuery !== "" && matches ? `translate(${x}, ${y}) scale(1.05) translate(${-x}, ${-y})` : undefined}
+                      style={{ transformOrigin: `${x + 75}px ${y + 48}px` }}
+                    >
+                      <PersonNode
+                        person={member}
+                        x={x}
+                        y={y}
+                        isSelected={selectedPerson?.id === member.id}
+                        onClick={() => handlePersonClick(member)}
+                      />
+                    </g>
+                  );
+                })}
               </svg>
             )}
           </motion.div>
