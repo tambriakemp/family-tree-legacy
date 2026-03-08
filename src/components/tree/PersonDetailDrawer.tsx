@@ -262,6 +262,19 @@ export function PersonDetailDrawer({
     setEditingRelationship(null);
   };
 
+  const directRelatedIds = useMemo(() => {
+    const ids = new Set<string>();
+    personRelationships.forEach(r => {
+      ids.add(r.from_person_id === person.id ? r.to_person_id : r.from_person_id);
+    });
+    return ids;
+  }, [personRelationships, person.id]);
+
+  const extendedFamily = useMemo(
+    () => getExtendedRelationships(person.id, relationships, members, directRelatedIds),
+    [person.id, relationships, members, directRelatedIds]
+  );
+
 
   return (
     <>
