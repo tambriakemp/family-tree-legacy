@@ -102,6 +102,30 @@ export function useFamilyTrees() {
   };
 }
 
+export function useTreeMemberCounts(treeIds: string[]) {
+  const { user } = useAuth();
+
+  return useQuery({
+    queryKey: ["tree-member-counts", treeIds],
+    queryFn: async () => {
+      if (treeIds.length === 0) return {} as Record<string, number>;
+
+      const { data, error } = await supabase
+        .from("tree_members")
+        .select("family_tree_id")
+        .in("family_tree_id", treeIds);
+
+      if (error) throw error;
+
+      const counts: Record<string, number> = {};
+      for (const id of treeIds) counts[id] = 0;
+      for (const row of data) counts[row.family_tree_id] = (counts[row.family_tree_id] || 0) + 1;
+      return counts;
+    },
+    enabled: treeIds.length > 0 && !!user,
+  });
+}
+
 export function useFamilyTree(treeId: string | undefined) {
   const { user } = useAuth();
 

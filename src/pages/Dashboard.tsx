@@ -5,7 +5,7 @@ import { Plus, TreeDeciduous, LogOut, Loader2, MoreVertical, Trash2, Edit } from
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
-import { useFamilyTrees } from "@/hooks/useFamilyTrees";
+import { useFamilyTrees, useTreeMemberCounts } from "@/hooks/useFamilyTrees";
 import { usePendingInvites } from "@/hooks/useCollaborators";
 import { CreateTreeDialog } from "@/components/tree/CreateTreeDialog";
 import { PendingInvitesCard } from "@/components/collaborators/PendingInvitesCard";
@@ -33,6 +33,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { trees, isLoading: treesLoading, createTree, deleteTree } = useFamilyTrees();
   const { pendingInvites, acceptInvite, declineInvite } = usePendingInvites();
+  const treeIds = trees.map((t) => t.id);
+  const { data: memberCounts } = useTreeMemberCounts(treeIds);
   const [searchParams] = useSearchParams();
   
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -228,6 +230,11 @@ const Dashboard = () => {
                 </h3>
                 <p className="text-sm text-muted-foreground">
                   Created {format(new Date(tree.created_at), "MMM d, yyyy")}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {memberCounts && memberCounts[tree.id] > 0
+                    ? `${memberCounts[tree.id]} people`
+                    : "No members yet"}
                 </p>
               </Link>
             </div>
