@@ -229,6 +229,24 @@ export function PersonDetailDrawer({
   const { notes, isLoading: notesLoading, createNote, deleteNote } = usePersonNotes(person?.id);
   const { data: personPhotos, isLoading: photosLoading } = usePersonPhotos(person?.id, person?.family_tree_id);
 
+  const personRelationships = relationships.filter(
+    (r) => person && (r.from_person_id === person.id || r.to_person_id === person.id)
+  );
+
+  const directRelatedIds = useMemo(() => {
+    if (!person) return new Set<string>();
+    const ids = new Set<string>();
+    personRelationships.forEach(r => {
+      ids.add(r.from_person_id === person.id ? r.to_person_id : r.from_person_id);
+    });
+    return ids;
+  }, [personRelationships, person?.id]);
+
+  const extendedFamily = useMemo(
+    () => person ? getExtendedRelationships(person.id, relationships, members, directRelatedIds) : [],
+    [person?.id, relationships, members, directRelatedIds]
+  );
+
   if (!person) return null;
 
   const fullName = `${person.first_name}${person.last_name ? ` ${person.last_name}` : ""}`;
@@ -236,10 +254,6 @@ export function PersonDetailDrawer({
   const getRelatedPerson = (personId: string) => {
     return members.find((m) => m.id === personId);
   };
-
-  const personRelationships = relationships.filter(
-    (r) => r.from_person_id === person.id || r.to_person_id === person.id
-  );
 
   const handleConfirmDelete = () => {
     setShowDeleteDialog(false);
@@ -261,19 +275,6 @@ export function PersonDetailDrawer({
     });
     setEditingRelationship(null);
   };
-
-  const directRelatedIds = useMemo(() => {
-    const ids = new Set<string>();
-    personRelationships.forEach(r => {
-      ids.add(r.from_person_id === person.id ? r.to_person_id : r.from_person_id);
-    });
-    return ids;
-  }, [personRelationships, person.id]);
-
-  const extendedFamily = useMemo(
-    () => getExtendedRelationships(person.id, relationships, members, directRelatedIds),
-    [person.id, relationships, members, directRelatedIds]
-  );
 
 
   return (
