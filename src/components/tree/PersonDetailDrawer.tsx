@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,14 +54,12 @@ interface PersonDetailDrawerProps {
 const relationshipLabels: Record<RelationshipType, string> = {
   parent: "Parent",
   spouse: "Spouse",
-  sibling: "Sibling",
   partner: "Partner",
 };
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
   { value: "parent", label: "Parent" },
   { value: "spouse", label: "Spouse" },
-  { value: "sibling", label: "Sibling" },
   { value: "partner", label: "Partner" },
 ];
 
@@ -220,7 +219,9 @@ export function PersonDetailDrawer({
                     variant="outline"
                     size="sm"
                     className="justify-start"
-                    onClick={() => onAddRelationship("sibling")}
+                    onClick={() => {
+                      toast.info("To add a sibling, add a shared parent to both people in the tree.");
+                    }}
                   >
                     <Users className="w-4 h-4 mr-2" />
                     Add Sibling
