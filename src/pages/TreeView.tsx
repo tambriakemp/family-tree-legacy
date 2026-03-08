@@ -582,6 +582,7 @@ const TreeView = () => {
         descriptionText={relationshipDescriptionText}
         lockedRelationType={lockedRelationType}
         isChildMode={isChildMode}
+        siblingParentIds={siblingMode ? siblingParentIds : undefined}
       />
 
       <PersonDetailDrawer

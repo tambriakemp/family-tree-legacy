@@ -14,11 +14,12 @@ interface RelationshipFormDialogProps {
   members: TreeMember[];
   onSubmit: (data: CreateRelationshipInput) => void;
   isLoading?: boolean;
-  existingRelationships?: { from_person_id: string; to_person_id: string }[];
+  existingRelationships?: { from_person_id: string; to_person_id: string; relationship_type?: string }[];
   defaultRelationType?: RelationshipType;
   descriptionText?: string;
   lockedRelationType?: RelationshipType;
   isChildMode?: boolean;
+  siblingParentIds?: string[];
 }
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
@@ -40,6 +41,7 @@ export function RelationshipFormDialog({
   descriptionText,
   lockedRelationType,
   isChildMode,
+  siblingParentIds,
 }: RelationshipFormDialogProps) {
   const [toPersonId, setToPersonId] = useState("");
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(defaultRelationType || "parent");
@@ -59,12 +61,28 @@ export function RelationshipFormDialog({
     if (!fromPerson) return true;
     if (m.id === fromPerson.id) return false;
     
+    // Standard filter: exclude people already related to fromPerson
     const exists = existingRelationships.some(
       (r) =>
         (r.from_person_id === fromPerson.id && r.to_person_id === m.id) ||
         (r.from_person_id === m.id && r.to_person_id === fromPerson.id)
     );
-    return !exists;
+    if (exists) return false;
+
+    // Sibling mode filter: exclude people who already have ALL the shared parents
+    // (they're already siblings)
+    if (siblingParentIds && siblingParentIds.length > 0) {
+      const personParentIds = existingRelationships
+        .filter(r => r.relationship_type === "parent" && r.to_person_id === m.id)
+        .map(r => r.from_person_id);
+      const hasAllParents = siblingParentIds.every(pid => personParentIds.includes(pid));
+      if (hasAllParents) return false;
+
+      // Also exclude the parents themselves
+      if (siblingParentIds.includes(m.id)) return false;
+    }
+
+    return true;
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -84,6 +102,7 @@ export function RelationshipFormDialog({
   const showByMarriage = effectiveType === "spouse" || effectiveType === "partner";
 
   const getDialogTitle = () => {
+    if (siblingParentIds && siblingParentIds.length > 0) return "Add Sibling";
     if (lockedRelationType) {
       if (lockedRelationType === "parent" && isChildMode) return "Add Child";
       if (lockedRelationType === "parent") return "Add Parent";
