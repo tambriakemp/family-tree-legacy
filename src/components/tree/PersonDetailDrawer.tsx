@@ -51,11 +51,19 @@ interface PersonDetailDrawerProps {
   isUpdatingRelationship?: boolean;
 }
 
-const getRelationshipLabel = (type: RelationshipType, relatedPerson?: TreeMember): string => {
+const getRelationshipLabel = (type: RelationshipType, relatedPerson: TreeMember | undefined, isFromPerson: boolean): string => {
   if (type === "parent") {
-    if (relatedPerson?.gender === "male") return "Father";
-    if (relatedPerson?.gender === "female") return "Mother";
-    return "Parent";
+    if (isFromPerson) {
+      // Viewed person is the parent, related person is the child
+      if (relatedPerson?.gender === "male") return "Son";
+      if (relatedPerson?.gender === "female") return "Daughter";
+      return "Child";
+    } else {
+      // Viewed person is the child, related person is the parent
+      if (relatedPerson?.gender === "male") return "Father";
+      if (relatedPerson?.gender === "female") return "Mother";
+      return "Parent";
+    }
   }
   if (type === "spouse") {
     if (relatedPerson?.gender === "male") return "Husband";
@@ -282,7 +290,7 @@ export function PersonDetailDrawer({
                               </Badge>
                             )}
                             <Badge variant="outline">
-                              {getRelationshipLabel(rel.relationship_type, related)}
+                              {getRelationshipLabel(rel.relationship_type, related, rel.from_person_id === person.id)}
                             </Badge>
                           </div>
                         </div>
@@ -332,7 +340,7 @@ export function PersonDetailDrawer({
                               {related.first_name} {related.last_name}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {getRelationshipLabel(rel.relationship_type, related)}
+                              {getRelationshipLabel(rel.relationship_type, related, rel.from_person_id === person.id)}
                               {rel.by_marriage && " (by marriage)"}
                             </p>
                           </div>
@@ -399,7 +407,7 @@ export function PersonDetailDrawer({
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <Badge variant="outline" className="text-xs">
-                              {getRelationshipLabel(rel.relationship_type, related)}
+                              {getRelationshipLabel(rel.relationship_type, related, rel.from_person_id === person.id)}
                             </Badge>
                             {rel.by_marriage && (
                               <Badge variant="secondary" className="text-xs">
