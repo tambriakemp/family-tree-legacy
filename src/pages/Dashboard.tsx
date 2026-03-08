@@ -7,7 +7,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { STRIPE_PLANS } from "@/lib/stripe-plans";
-import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { useFamilyTrees, useTreeMemberCounts } from "@/hooks/useFamilyTrees";
 import { usePendingInvites } from "@/hooks/useCollaborators";
