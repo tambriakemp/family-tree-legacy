@@ -64,23 +64,35 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
         </foreignObject>
       )}
       
-      {/* Name */}
+      {/* First name */}
       <text
         x={x + 65}
-        y={y + 35}
+        y={y + 32}
         className="fill-foreground text-sm font-medium"
         style={{ fontSize: "13px" }}
       >
-        {fullName.length > 14 ? fullName.slice(0, 14) + "..." : fullName}
+        {truncate(person.first_name, 16)}
       </text>
+      
+      {/* Last name */}
+      {person.last_name && (
+        <text
+          x={x + 65}
+          y={y + 48}
+          className="fill-muted-foreground"
+          style={{ fontSize: "11px" }}
+        >
+          {truncate(person.last_name, 16)}
+        </text>
+      )}
       
       {/* Date range */}
       {dateRange && (
         <text
           x={x + 65}
-          y={y + 52}
+          y={y + 65}
           className="fill-muted-foreground text-xs"
-          style={{ fontSize: "11px" }}
+          style={{ fontSize: "10px" }}
         >
           {dateRange}
         </text>
