@@ -32,10 +32,19 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
         width={160}
         height={96}
         rx={16}
-        className={`fill-card stroke-2 shadow-lg ${
+        className={`${person.death_date ? "fill-muted" : "fill-card"} stroke-2 shadow-lg ${
           isSelected ? "stroke-primary" : "stroke-primary/50"
         }`}
       />
+      
+      {person.death_date && (
+        <text
+          x={x + 145}
+          y={y + 18}
+          className="fill-muted-foreground"
+          style={{ fontSize: "11px" }}
+        >†</text>
+      )}
       
       {/* Avatar circle */}
       {person.profile_photo_url ? (
