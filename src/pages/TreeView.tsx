@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X } from "lucide-react";
+import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download } from "lucide-react";
+import html2canvas from "html2canvas";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { useFamilyTree } from "@/hooks/useFamilyTrees";
 import { useTreeMembers } from "@/hooks/useTreeMembers";
@@ -42,6 +44,8 @@ const TreeView = () => {
   const [viewportSize, setViewportSize] = useState({ width: 800, height: 600 });
   const canvasRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
 
   // Use hierarchical tree layout
   const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
@@ -142,6 +146,33 @@ const TreeView = () => {
     await updateRelationship.mutateAsync(data);
   };
 
+  const exportTree = async () => {
+    if (!canvasRef.current) return;
+    setIsExporting(true);
+    const prevZoom = zoom;
+    const prevPan = { ...pan };
+
+    try {
+      setZoom(1);
+      setPan({ x: 0, y: 0 });
+      await new Promise((r) => setTimeout(r, 300));
+
+      const canvas = await html2canvas(canvasRef.current);
+      const link = document.createElement("a");
+      link.download = `${tree?.title || "family-tree"}-family-tree.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+
+      toast({ title: "Family tree exported!" });
+    } catch {
+      toast({ title: "Export failed. Please try again.", variant: "destructive" });
+    } finally {
+      setZoom(prevZoom);
+      setPan(prevPan);
+      setIsExporting(false);
+    }
+  };
+
   const handleInviteSubmit = async (data: { email: string; role: CollaboratorRole }) => {
     if (!treeId) return;
     await sendInvite.mutateAsync({
@@ -221,6 +252,15 @@ const TreeView = () => {
             >
               <UserPlus className="w-4 h-4 mr-2" />
               Invite
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportTree}
+              disabled={isExporting || members.length === 0}
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+              {isExporting ? "Exporting..." : "Export"}
             </Button>
             <Button variant="default" size="sm" onClick={handleAddPerson}>
               <Plus className="w-4 h-4 mr-2" />
