@@ -224,6 +224,7 @@ export function PersonDetailDrawer({
   const [editRelType, setEditRelType] = useState<RelationshipType>("parent");
   const [editByMarriage, setEditByMarriage] = useState(false);
   const [newNote, setNewNote] = useState("");
+  const [showExtendedFamily, setShowExtendedFamily] = useState(false);
   
   const { notes, isLoading: notesLoading, createNote, deleteNote } = usePersonNotes(person?.id);
   const { data: personPhotos, isLoading: photosLoading } = usePersonPhotos(person?.id, person?.family_tree_id);
