@@ -489,10 +489,9 @@ const TreeView = () => {
               </div>
             ) : (
               <svg
-                className="w-full"
+                width={svgWidth}
+                height={svgHeight}
                 viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-                preserveAspectRatio="xMidYMin meet"
-                style={{ minWidth: Math.min(svgWidth, 1200), minHeight: svgHeight }}
               >
                 {/* Relationship connections */}
                 <TreeConnections connections={connections} />
