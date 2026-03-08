@@ -282,7 +282,7 @@ export function PersonDetailDrawer({
                               </Badge>
                             )}
                             <Badge variant="outline">
-                              {relationshipLabels[rel.relationship_type]}
+                              {getRelationshipLabel(rel.relationship_type, related)}
                             </Badge>
                           </div>
                         </div>
