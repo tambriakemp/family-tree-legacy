@@ -40,17 +40,6 @@ const Dashboard = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [treeToDelete, setTreeToDelete] = useState<string | null>(null);
   
-  // Show debug panel only when ?debug=1 is present
-  const showDebug = searchParams.get("debug") === "1";
-  
-  // Debug state for RLS investigation (only load when needed)
-  const [debugInfo, setDebugInfo] = useState<{
-    sessionUserId: string | null;
-    dbAuthUid: string | null;
-    dbJwtSub: string | null;
-    dbJwtRole: string | null;
-    error: string | null;
-  } | null>(null);
 
 
   // Handle invite deep link
