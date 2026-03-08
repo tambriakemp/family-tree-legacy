@@ -526,6 +526,16 @@ const TreeView = () => {
         }}
         isOwner={isOwner}
       />
+
+      <GedcomImportDialog
+        open={showGedcomImport}
+        onOpenChange={setShowGedcomImport}
+        treeId={treeId || ""}
+        onSuccess={() => {
+          // Invalidate all tree-related queries
+          import("@tanstack/react-query").then(({ useQueryClient }) => {});
+        }}
+      />
     </div>
   );
 };
