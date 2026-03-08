@@ -517,6 +517,7 @@ const TreeView = () => {
         onEdit={handleEditPerson}
         onDelete={handleDeletePerson}
         onAddRelationship={handleAddRelationship}
+        onAddSibling={handleAddSibling}
         isDeleting={deleteMember.isPending}
         onDeleteRelationship={handleDeleteRelationship}
         isDeletingRelationship={deleteRelationship.isPending}

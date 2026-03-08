@@ -90,6 +90,9 @@ export function RelationshipFormDialog({
               </span>
             )}
           </DialogTitle>
+          {descriptionText && (
+            <p className="text-sm text-muted-foreground mt-1">{descriptionText}</p>
+          )}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
