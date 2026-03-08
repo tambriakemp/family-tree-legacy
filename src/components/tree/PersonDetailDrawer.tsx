@@ -52,7 +52,6 @@ interface PersonDetailDrawerProps {
 
 const relationshipLabels: Record<RelationshipType, string> = {
   parent: "Parent",
-  child: "Child",
   spouse: "Spouse",
   sibling: "Sibling",
   partner: "Partner",
