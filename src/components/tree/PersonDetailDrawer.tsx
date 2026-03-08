@@ -218,6 +218,7 @@ export function PersonDetailDrawer({
   isDeletingRelationship,
   onUpdateRelationship,
   isUpdatingRelationship,
+  onCreateRelationship,
 }: PersonDetailDrawerProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteRelDialog, setShowDeleteRelDialog] = useState<string | null>(null);
