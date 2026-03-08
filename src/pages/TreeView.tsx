@@ -46,6 +46,8 @@ const TreeView = () => {
   const [defaultRelationType, setDefaultRelationType] = useState<RelationshipType>("parent");
   const [relationshipDescriptionText, setRelationshipDescriptionText] = useState<string | undefined>();
   const [siblingMode, setSiblingMode] = useState(false);
+  const [lockedRelationType, setLockedRelationType] = useState<RelationshipType | undefined>();
+  const [isChildMode, setIsChildMode] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: 800, height: 600 });
   const canvasRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,8 +149,12 @@ const TreeView = () => {
 
   const handleAddRelationship = (type: RelationshipType) => {
     setDefaultRelationType(type);
+    setLockedRelationType(type);
+    setIsChildMode(false);
     if (type === "parent" && selectedPerson) {
-      setRelationshipDescriptionText(`Select the parent of ${selectedPerson.first_name}${selectedPerson.last_name ? ' ' + selectedPerson.last_name : ''}.`);
+      setRelationshipDescriptionText(`Who is the parent of ${selectedPerson.first_name}${selectedPerson.last_name ? ' ' + selectedPerson.last_name : ''}?`);
+    } else if (type === "spouse" && selectedPerson) {
+      setRelationshipDescriptionText(`Who is the spouse of ${selectedPerson.first_name}${selectedPerson.last_name ? ' ' + selectedPerson.last_name : ''}?`);
     } else {
       setRelationshipDescriptionText(undefined);
     }
@@ -158,14 +164,18 @@ const TreeView = () => {
 
   const handleAddChild = () => {
     setDefaultRelationType("parent");
-    setRelationshipDescriptionText(`Select the child to add. They will be listed as a child of ${selectedPerson?.first_name}${selectedPerson?.last_name ? ' ' + selectedPerson.last_name : ''}.`);
+    setLockedRelationType("parent");
+    setIsChildMode(true);
+    setRelationshipDescriptionText(`Who is the child of ${selectedPerson?.first_name}${selectedPerson?.last_name ? ' ' + selectedPerson.last_name : ''}?`);
     setSiblingMode(false);
     setShowRelationshipForm(true);
   };
 
   const handleAddSibling = () => {
     setDefaultRelationType("parent");
-    setRelationshipDescriptionText("Select this person's parent to link them as a sibling. Any existing children of that parent will automatically be siblings.");
+    setLockedRelationType("parent");
+    setIsChildMode(false);
+    setRelationshipDescriptionText("Select the shared parent for this sibling relationship.");
     setSiblingMode(true);
     setShowRelationshipForm(true);
   };
@@ -178,6 +188,8 @@ const TreeView = () => {
       setSiblingMode(false);
     }
     setRelationshipDescriptionText(undefined);
+    setLockedRelationType(undefined);
+    setIsChildMode(false);
   };
 
   const handleDeleteRelationship = async (id: string) => {
@@ -517,6 +529,8 @@ const TreeView = () => {
         existingRelationships={relationships}
         defaultRelationType={defaultRelationType}
         descriptionText={relationshipDescriptionText}
+        lockedRelationType={lockedRelationType}
+        isChildMode={isChildMode}
       />
 
       <PersonDetailDrawer
