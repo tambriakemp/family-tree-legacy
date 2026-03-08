@@ -7,7 +7,7 @@ import { ProjectSettingsDialog } from "@/components/tree/ProjectSettingsDialog";
 import html2canvas from "html2canvas";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { useFamilyTree } from "@/hooks/useFamilyTrees";
+import { useFamilyTree, useFamilyTrees } from "@/hooks/useFamilyTrees";
 import { useTreeMembers } from "@/hooks/useTreeMembers";
 import { useRelationships } from "@/hooks/useRelationships";
 import { useCollaborators } from "@/hooks/useCollaborators";
