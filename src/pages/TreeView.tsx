@@ -188,6 +188,8 @@ const TreeView = () => {
       setSiblingMode(false);
     }
     setRelationshipDescriptionText(undefined);
+    setLockedRelationType(undefined);
+    setIsChildMode(false);
   };
 
   const handleDeleteRelationship = async (id: string) => {
