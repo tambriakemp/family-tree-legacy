@@ -78,7 +78,8 @@ export function useTreeLayout(
       if (processedIds.has(root.id)) return;
 
       const spouseId = spouseMap.get(root.id);
-      const spouse = spouseId ? members.find((m) => m.id === spouseId) : undefined;
+      const isSpouseAlsoRoot = spouseId ? roots.some((r) => r.id === spouseId) && processedIds.has(spouseId) : false;
+      const spouse = spouseId && !isSpouseAlsoRoot ? members.find((m) => m.id === spouseId) : undefined;
 
       // Get children of this family unit
       const primaryChildren = parentChildMap.get(root.id) || [];
