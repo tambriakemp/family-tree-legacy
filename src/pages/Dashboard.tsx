@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, TreeDeciduous, LogOut, Loader2, MoreVertical, Trash2, Edit } from "lucide-react";
+import { Plus, TreeDeciduous, LogOut, Loader2, MoreVertical, Trash2, Edit, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { STRIPE_PLANS } from "@/lib/stripe-plans";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
 import { useFamilyTrees, useTreeMemberCounts } from "@/hooks/useFamilyTrees";
