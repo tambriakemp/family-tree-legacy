@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download, TreeDeciduous } from "lucide-react";
+import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download, TreeDeciduous, Upload } from "lucide-react";
 import html2canvas from "html2canvas";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { RelationshipFormDialog } from "@/components/tree/RelationshipFormDialog
 import { PersonDetailDrawer } from "@/components/tree/PersonDetailDrawer";
 import { InviteCollaboratorDialog } from "@/components/collaborators/InviteCollaboratorDialog";
 import { CollaboratorList } from "@/components/collaborators/CollaboratorList";
+import { GedcomImportDialog } from "@/components/tree/GedcomImportDialog";
 import { TreeConnections } from "@/components/tree/TreeConnections";
 import { TreeMinimap } from "@/components/tree/TreeMinimap";
 import { useTreeLayout } from "@/components/tree/useTreeLayout";
@@ -29,6 +31,7 @@ const TreeView = () => {
   const { relationships, createRelationship, deleteRelationship, updateRelationship } = useRelationships(treeId);
   const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const isOwner = tree?.owner_user_id === user?.id;
 
@@ -46,6 +49,7 @@ const TreeView = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showGedcomImport, setShowGedcomImport] = useState(false);
   const { toast } = useToast();
 
   // Onboarding tooltip after first person added
@@ -276,6 +280,14 @@ const TreeView = () => {
             >
               {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
               {isExporting ? "Exporting..." : "Export"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowGedcomImport(true)}
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Import GEDCOM
             </Button>
             <Button variant="default" size="sm" onClick={handleAddPerson}>
               <Plus className="w-4 h-4 mr-2" />
@@ -515,6 +527,16 @@ const TreeView = () => {
           setShowInviteDialog(true);
         }}
         isOwner={isOwner}
+      />
+
+      <GedcomImportDialog
+        open={showGedcomImport}
+        onOpenChange={setShowGedcomImport}
+        treeId={treeId || ""}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["tree-members", treeId] });
+          queryClient.invalidateQueries({ queryKey: ["relationships", treeId] });
+        }}
       />
     </div>
   );
