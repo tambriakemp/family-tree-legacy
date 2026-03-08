@@ -114,6 +114,7 @@ export interface CreateTreeMemberInput {
   last_name?: string;
   birth_date?: string;
   death_date?: string;
+  gender?: string;
   profile_photo_url?: string;
 }
 
