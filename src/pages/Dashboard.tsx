@@ -5,7 +5,7 @@ import { Plus, TreeDeciduous, LogOut, Loader2, MoreVertical, Trash2, Edit } from
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/layout/Header";
-import { useFamilyTrees } from "@/hooks/useFamilyTrees";
+import { useFamilyTrees, useTreeMemberCounts } from "@/hooks/useFamilyTrees";
 import { usePendingInvites } from "@/hooks/useCollaborators";
 import { CreateTreeDialog } from "@/components/tree/CreateTreeDialog";
 import { PendingInvitesCard } from "@/components/collaborators/PendingInvitesCard";
