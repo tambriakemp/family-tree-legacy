@@ -253,6 +253,15 @@ const TreeView = () => {
               <UserPlus className="w-4 h-4 mr-2" />
               Invite
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportTree}
+              disabled={isExporting || members.length === 0}
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+              {isExporting ? "Exporting..." : "Export"}
+            </Button>
             <Button variant="default" size="sm" onClick={handleAddPerson}>
               <Plus className="w-4 h-4 mr-2" />
               Add Person
