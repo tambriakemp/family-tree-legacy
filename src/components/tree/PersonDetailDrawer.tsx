@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   User, Edit, Trash2, Plus, Heart, Users, 
-  Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send, History, Clock
+  Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send, History, Clock, ChevronRight
 } from "lucide-react";
 import type { TreeMember, Relationship, RelationshipType, PhotoWithTags } from "@/types/database";
 import { format } from "date-fns";
