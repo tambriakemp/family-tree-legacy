@@ -458,7 +458,7 @@ export type Database = {
       app_role: "admin" | "user"
       collaborator_role: "owner" | "editor" | "viewer"
       invite_status: "pending" | "accepted" | "declined"
-      relationship_type: "parent" | "child" | "spouse" | "sibling" | "partner"
+      relationship_type: "parent" | "spouse" | "partner"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -589,7 +589,7 @@ export const Constants = {
       app_role: ["admin", "user"],
       collaborator_role: ["owner", "editor", "viewer"],
       invite_status: ["pending", "accepted", "declined"],
-      relationship_type: ["parent", "child", "spouse", "sibling", "partner"],
+      relationship_type: ["parent", "spouse", "partner"],
     },
   },
 } as const
