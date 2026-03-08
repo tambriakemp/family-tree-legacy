@@ -228,17 +228,52 @@ const Dashboard = () => {
           transition={{ delay: 0.2 }}
           className="mt-12 p-6 rounded-2xl bg-gradient-hero border border-border"
         >
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <h3 className="font-display text-xl font-semibold text-foreground mb-1">
-                Free Trial
-              </h3>
-              <p className="text-muted-foreground">
-                Upgrade to unlock unlimited trees and collaborators
-              </p>
+          {subscription.subscribed ? (
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Crown className="w-6 h-6 text-accent" />
+                <div>
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-1">
+                    Pro {subscription.planKey === "yearly" ? "Yearly" : "Monthly"}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {subscription.subscriptionEnd
+                      ? `Renews ${format(new Date(subscription.subscriptionEnd), "MMM d, yyyy")}`
+                      : "Active subscription"}
+                  </p>
+                </div>
+              </div>
             </div>
-            <Button variant="hero">Upgrade to Pro - $6/mo</Button>
-          </div>
+          ) : (
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-display text-xl font-semibold text-foreground mb-1">
+                  Free Plan
+                </h3>
+                <p className="text-muted-foreground">
+                  Upgrade to unlock unlimited trees and collaborators
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleCheckout("monthly")}
+                  disabled={!!checkoutLoading}
+                >
+                  {checkoutLoading === "monthly" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  $6/mo
+                </Button>
+                <Button
+                  variant="hero"
+                  onClick={() => handleCheckout("yearly")}
+                  disabled={!!checkoutLoading}
+                >
+                  {checkoutLoading === "yearly" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  $48/yr (Save 33%)
+                </Button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </main>
 
