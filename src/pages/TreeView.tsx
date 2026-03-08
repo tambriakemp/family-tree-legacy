@@ -363,16 +363,27 @@ const TreeView = () => {
                 <TreeConnections connections={connections} />
 
                 {/* Person nodes */}
-                {nodePositions.map(({ member, x, y }) => (
-                  <PersonNode
-                    key={member.id}
-                    person={member}
-                    x={x}
-                    y={y}
-                    isSelected={selectedPerson?.id === member.id}
-                    onClick={() => handlePersonClick(member)}
-                  />
-                ))}
+                {nodePositions.map(({ member, x, y }) => {
+                  const matches = searchQuery === "" || 
+                    member.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    (member.last_name && member.last_name.toLowerCase().includes(searchQuery.toLowerCase()));
+                  return (
+                    <g
+                      key={member.id}
+                      opacity={searchQuery === "" ? 1 : matches ? 1 : 0.3}
+                      transform={searchQuery !== "" && matches ? `translate(${x}, ${y}) scale(1.05) translate(${-x}, ${-y})` : undefined}
+                      style={{ transformOrigin: `${x + 75}px ${y + 48}px` }}
+                    >
+                      <PersonNode
+                        person={member}
+                        x={x}
+                        y={y}
+                        isSelected={selectedPerson?.id === member.id}
+                        onClick={() => handlePersonClick(member)}
+                      />
+                    </g>
+                  );
+                })}
               </svg>
             )}
           </motion.div>
