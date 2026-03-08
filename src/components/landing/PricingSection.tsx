@@ -47,6 +47,28 @@ const plans = [
 
 export function PricingSection() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      navigate("/signup");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_PLANS[selectedPlan].price_id },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error("Failed to start checkout: " + (err.message || "Unknown error"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="py-24 md:py-32 bg-background">
