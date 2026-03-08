@@ -41,6 +41,7 @@ const TreeView = () => {
   const [defaultRelationType, setDefaultRelationType] = useState<RelationshipType>("parent");
   const [viewportSize, setViewportSize] = useState({ width: 800, height: 600 });
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Use hierarchical tree layout
   const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
