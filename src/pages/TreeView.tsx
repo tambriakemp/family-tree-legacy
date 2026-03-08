@@ -3,10 +3,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download, TreeDeciduous, Upload } from "lucide-react";
+import { ProjectSettingsDialog } from "@/components/tree/ProjectSettingsDialog";
 import html2canvas from "html2canvas";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { useFamilyTree } from "@/hooks/useFamilyTrees";
+import { useFamilyTree, useFamilyTrees } from "@/hooks/useFamilyTrees";
 import { useTreeMembers } from "@/hooks/useTreeMembers";
 import { useRelationships } from "@/hooks/useRelationships";
 import { useCollaborators } from "@/hooks/useCollaborators";
@@ -27,6 +28,7 @@ import type { TreeMember, RelationshipType, CreateTreeMemberInput, UpdateTreeMem
 const TreeView = () => {
   const { treeId } = useParams<{ treeId: string }>();
   const { data: tree, isLoading: treeLoading } = useFamilyTree(treeId);
+  const { updateTree } = useFamilyTrees();
   const { members, isLoading: membersLoading, createMember, updateMember, deleteMember } = useTreeMembers(treeId);
   const { relationships, createRelationship, deleteRelationship, updateRelationship } = useRelationships(treeId);
   const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
@@ -105,6 +107,15 @@ const TreeView = () => {
     window.addEventListener("resize", updateViewportSize);
     return () => window.removeEventListener("resize", updateViewportSize);
   }, []);
+
+  const handleUpdateTreeName = (name: string) => {
+    if (!treeId) return;
+    updateTree.mutate({ id: treeId, title: name }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["family-tree", treeId] });
+      },
+    });
+  };
 
   const isLoading = treeLoading || membersLoading;
 
@@ -346,39 +357,18 @@ const TreeView = () => {
                 Photos
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowCollaboratorList(true)}
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Collaborators
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setShowInviteDialog(true)}
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Invite
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={exportTree}
-              disabled={isExporting || members.length === 0}
-            >
-              {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-              {isExporting ? "Exporting..." : "Export"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowGedcomImport(true)}
-            >
-              <Upload className="w-4 h-4 mr-2" />
-              Import GEDCOM
-            </Button>
+            <ProjectSettingsDialog
+              treeName={tree?.title || "Family Tree"}
+              onUpdateName={handleUpdateTreeName}
+              isUpdatingName={updateTree.isPending}
+              onOpenCollaborators={() => setShowCollaboratorList(true)}
+              onOpenInvite={() => setShowInviteDialog(true)}
+              onExport={exportTree}
+              isExporting={isExporting}
+              canExport={members.length > 0}
+              onImportGedcom={() => setShowGedcomImport(true)}
+              isOwner={isOwner}
+            />
             <Button variant="default" size="sm" onClick={handleAddPerson}>
               <Plus className="w-4 h-4 mr-2" />
               Add Person
