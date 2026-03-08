@@ -73,7 +73,7 @@ export function GedcomImportDialog({ open, onOpenChange, treeId, onSuccess }: Ge
         family_tree_id: string;
         from_person_id: string;
         to_person_id: string;
-        relationship_type: string;
+        relationship_type: "parent" | "child" | "spouse" | "sibling" | "partner";
         by_marriage: boolean;
         created_by_user_id: string;
       }[] = [];

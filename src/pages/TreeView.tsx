@@ -16,6 +16,7 @@ import { RelationshipFormDialog } from "@/components/tree/RelationshipFormDialog
 import { PersonDetailDrawer } from "@/components/tree/PersonDetailDrawer";
 import { InviteCollaboratorDialog } from "@/components/collaborators/InviteCollaboratorDialog";
 import { CollaboratorList } from "@/components/collaborators/CollaboratorList";
+import { GedcomImportDialog } from "@/components/tree/GedcomImportDialog";
 import { TreeConnections } from "@/components/tree/TreeConnections";
 import { TreeMinimap } from "@/components/tree/TreeMinimap";
 import { useTreeLayout } from "@/components/tree/useTreeLayout";
