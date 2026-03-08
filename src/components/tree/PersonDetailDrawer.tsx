@@ -769,6 +769,21 @@ export function PersonDetailDrawer({
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
+              <Label>Related Person</Label>
+              <Select value={editToPersonId} onValueChange={setEditToPersonId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a person" />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.filter(m => m.id !== person.id).map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.first_name} {member.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label>Relationship Type</Label>
               <Select
                 value={editRelType}
