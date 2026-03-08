@@ -88,6 +88,23 @@ const Dashboard = () => {
     }
   };
 
+  const handleCheckout = async (planKey: "monthly" | "yearly") => {
+    setCheckoutLoading(planKey);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_PLANS[planKey].price_id },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast.error("Failed to start checkout: " + (err.message || "Unknown error"));
+    } finally {
+      setCheckoutLoading(null);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
