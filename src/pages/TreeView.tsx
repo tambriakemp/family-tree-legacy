@@ -505,6 +505,7 @@ const TreeView = () => {
         isLoading={createRelationship.isPending}
         existingRelationships={relationships}
         defaultRelationType={defaultRelationType}
+        descriptionText={relationshipDescriptionText}
       />
 
       <PersonDetailDrawer
