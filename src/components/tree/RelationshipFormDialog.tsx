@@ -17,6 +17,8 @@ interface RelationshipFormDialogProps {
   existingRelationships?: { from_person_id: string; to_person_id: string }[];
   defaultRelationType?: RelationshipType;
   descriptionText?: string;
+  lockedRelationType?: RelationshipType;
+  isChildMode?: boolean;
 }
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
@@ -36,10 +38,14 @@ export function RelationshipFormDialog({
   existingRelationships = [],
   defaultRelationType,
   descriptionText,
+  lockedRelationType,
+  isChildMode,
 }: RelationshipFormDialogProps) {
   const [toPersonId, setToPersonId] = useState("");
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(defaultRelationType || "parent");
   const [byMarriage, setByMarriage] = useState(false);
+
+  const effectiveType = lockedRelationType || relationshipType;
 
   useEffect(() => {
     if (open) {
@@ -53,7 +59,6 @@ export function RelationshipFormDialog({
     if (!fromPerson) return true;
     if (m.id === fromPerson.id) return false;
     
-    // Check if relationship already exists
     const exists = existingRelationships.some(
       (r) =>
         (r.from_person_id === fromPerson.id && r.to_person_id === m.id) ||
@@ -65,25 +70,35 @@ export function RelationshipFormDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!fromPerson || !toPersonId || !relationshipType) return;
+    if (!fromPerson || !toPersonId || !effectiveType) return;
 
     onSubmit({
       family_tree_id: treeId,
       from_person_id: fromPerson.id,
       to_person_id: toPersonId,
-      relationship_type: relationshipType,
+      relationship_type: effectiveType,
       by_marriage: byMarriage,
     });
   };
 
-  const showByMarriage = relationshipType === "spouse" || relationshipType === "partner";
+  const showByMarriage = effectiveType === "spouse" || effectiveType === "partner";
+
+  const getDialogTitle = () => {
+    if (lockedRelationType) {
+      if (lockedRelationType === "parent" && isChildMode) return "Add Child";
+      if (lockedRelationType === "parent") return "Add Parent";
+      if (lockedRelationType === "spouse") return "Add Spouse";
+      if (lockedRelationType === "partner") return "Add Partner";
+    }
+    return "Add Relationship";
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display">
-            Add Relationship
+            {getDialogTitle()}
             {fromPerson && (
               <span className="text-muted-foreground font-normal text-sm ml-2">
                 for {fromPerson.first_name} {fromPerson.last_name}
@@ -95,24 +110,26 @@ export function RelationshipFormDialog({
           )}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Relationship Type *</Label>
-            <Select
-              value={relationshipType}
-              onValueChange={(value) => setRelationshipType(value as RelationshipType)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select relationship type" />
-              </SelectTrigger>
-              <SelectContent>
-                {relationshipTypes.map((type) => (
-                  <SelectItem key={type.value} value={type.value}>
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {!lockedRelationType && (
+            <div className="space-y-2">
+              <Label>Relationship Type *</Label>
+              <Select
+                value={relationshipType}
+                onValueChange={(value) => setRelationshipType(value as RelationshipType)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select relationship type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {relationshipTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label>Related Person *</Label>
@@ -162,9 +179,9 @@ export function RelationshipFormDialog({
             </Button>
             <Button
               type="submit"
-              disabled={isLoading || !toPersonId || !relationshipType}
+              disabled={isLoading || !toPersonId || !effectiveType}
             >
-              {isLoading ? "Adding..." : "Add Relationship"}
+              {isLoading ? "Adding..." : getDialogTitle()}
             </Button>
           </DialogFooter>
         </form>
