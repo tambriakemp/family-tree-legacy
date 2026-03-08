@@ -44,6 +44,7 @@ interface PersonDetailDrawerProps {
   onEdit: () => void;
   onDelete: () => void;
   onAddRelationship: (type: RelationshipType) => void;
+  onAddSibling: () => void;
   isDeleting?: boolean;
   onDeleteRelationship: (id: string) => void;
   isDeletingRelationship?: boolean;
@@ -95,6 +96,7 @@ export function PersonDetailDrawer({
   onEdit,
   onDelete,
   onAddRelationship,
+  onAddSibling,
   isDeleting,
   onDeleteRelationship,
   isDeletingRelationship,
@@ -242,9 +244,7 @@ export function PersonDetailDrawer({
                     variant="outline"
                     size="sm"
                     className="justify-start"
-                    onClick={() => {
-                      toast.info("To add a sibling, add a shared parent to both people in the tree.");
-                    }}
+                    onClick={() => onAddSibling()}
                   >
                     <Users className="w-4 h-4 mr-2" />
                     Add Sibling

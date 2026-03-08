@@ -44,6 +44,8 @@ const TreeView = () => {
   const [showCollaboratorList, setShowCollaboratorList] = useState(false);
   const [editingPerson, setEditingPerson] = useState<TreeMember | null>(null);
   const [defaultRelationType, setDefaultRelationType] = useState<RelationshipType>("parent");
+  const [relationshipDescriptionText, setRelationshipDescriptionText] = useState<string | undefined>();
+  const [siblingMode, setSiblingMode] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: 800, height: 600 });
   const canvasRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -145,12 +147,26 @@ const TreeView = () => {
 
   const handleAddRelationship = (type: RelationshipType) => {
     setDefaultRelationType(type);
+    setRelationshipDescriptionText(undefined);
+    setSiblingMode(false);
+    setShowRelationshipForm(true);
+  };
+
+  const handleAddSibling = () => {
+    setDefaultRelationType("parent");
+    setRelationshipDescriptionText("Select this person's parent to link them as a sibling. Any existing children of that parent will automatically be siblings.");
+    setSiblingMode(true);
     setShowRelationshipForm(true);
   };
 
   const handleRelationshipSubmit = async (data: Parameters<typeof createRelationship.mutateAsync>[0]) => {
     await createRelationship.mutateAsync(data);
     setShowRelationshipForm(false);
+    if (siblingMode) {
+      toast({ title: "Sibling added via shared parent!" });
+      setSiblingMode(false);
+    }
+    setRelationshipDescriptionText(undefined);
   };
 
   const handleDeleteRelationship = async (id: string) => {
@@ -159,7 +175,7 @@ const TreeView = () => {
 
   const handleUpdateRelationship = async (data: { 
     id: string; 
-    relationship_type?: "parent" | "child" | "spouse" | "sibling" | "partner"; 
+    relationship_type?: RelationshipType; 
     by_marriage?: boolean 
   }) => {
     await updateRelationship.mutateAsync(data);
@@ -489,6 +505,7 @@ const TreeView = () => {
         isLoading={createRelationship.isPending}
         existingRelationships={relationships}
         defaultRelationType={defaultRelationType}
+        descriptionText={relationshipDescriptionText}
       />
 
       <PersonDetailDrawer
@@ -500,6 +517,7 @@ const TreeView = () => {
         onEdit={handleEditPerson}
         onDelete={handleDeletePerson}
         onAddRelationship={handleAddRelationship}
+        onAddSibling={handleAddSibling}
         isDeleting={deleteMember.isPending}
         onDeleteRelationship={handleDeleteRelationship}
         isDeletingRelationship={deleteRelationship.isPending}

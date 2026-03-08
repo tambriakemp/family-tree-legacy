@@ -16,6 +16,7 @@ interface RelationshipFormDialogProps {
   isLoading?: boolean;
   existingRelationships?: { from_person_id: string; to_person_id: string }[];
   defaultRelationType?: RelationshipType;
+  descriptionText?: string;
 }
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
@@ -34,6 +35,7 @@ export function RelationshipFormDialog({
   isLoading,
   existingRelationships = [],
   defaultRelationType,
+  descriptionText,
 }: RelationshipFormDialogProps) {
   const [toPersonId, setToPersonId] = useState("");
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(defaultRelationType || "parent");
@@ -88,6 +90,9 @@ export function RelationshipFormDialog({
               </span>
             )}
           </DialogTitle>
+          {descriptionText && (
+            <p className="text-sm text-muted-foreground mt-1">{descriptionText}</p>
+          )}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
