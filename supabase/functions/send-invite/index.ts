@@ -131,9 +131,25 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error("Resend API error:", errorText);
-      throw new Error(`Failed to send email: ${errorText}`);
+      const errorBody = await emailResponse.json().catch(() => ({ message: "Unknown error" }));
+      console.error("Resend API error:", errorBody);
+
+      // Handle domain-not-verified restriction gracefully — invite is already saved
+      if (emailResponse.status === 403 && errorBody?.name === "validation_error") {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            warning: "Invite created but email not sent — verify a domain at resend.com/domains to send to external recipients.",
+            inviteUrl,
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          }
+        );
+      }
+
+      throw new Error(`Failed to send email: ${JSON.stringify(errorBody)}`);
     }
 
     const emailResult = await emailResponse.json();
