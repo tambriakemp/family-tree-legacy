@@ -30,7 +30,7 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
         x={x}
         y={y}
         width={160}
-        height={80}
+        height={96}
         rx={16}
         className={`fill-card stroke-2 shadow-lg ${
           isSelected ? "stroke-primary" : "stroke-primary/50"
