@@ -293,14 +293,6 @@ const TreeView = () => {
     }
   };
 
-  const handleInviteSubmit = async (data: { email: string; role: CollaboratorRole }) => {
-    if (!treeId) return;
-    await sendInvite.mutateAsync({
-      family_tree_id: treeId,
-      email: data.email,
-      role: data.role,
-    });
-  };
 
   if (isLoading) {
     return (
@@ -561,8 +553,6 @@ const TreeView = () => {
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
         treeId={treeId || ""}
-        onSubmit={handleInviteSubmit}
-        isLoading={sendInvite.isPending}
       />
 
       <CollaboratorList
