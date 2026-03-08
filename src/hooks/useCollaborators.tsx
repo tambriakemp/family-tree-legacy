@@ -64,20 +64,6 @@ export function useCollaborators(treeId: string | undefined) {
 
       if (error) throw error;
 
-      // Call edge function to send invite email
-      const { error: emailError } = await supabase.functions.invoke("send-invite", {
-        body: {
-          inviteId: data.id,
-          email: input.email.toLowerCase(),
-          treeId: input.family_tree_id,
-        },
-      });
-
-      if (emailError) {
-        console.error("Failed to send invite email:", emailError);
-        // Don't throw - invite is still created, just email failed
-      }
-
       return data as TreeCollaborator;
     },
     onSuccess: () => {
