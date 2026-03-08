@@ -13,7 +13,7 @@ import {
   User, Edit, Trash2, Plus, Heart, Users, 
   Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send, History, Clock, ChevronRight
 } from "lucide-react";
-import type { TreeMember, Relationship, RelationshipType, PhotoWithTags } from "@/types/database";
+import type { TreeMember, Relationship, RelationshipType, PhotoWithTags, CreateRelationshipInput } from "@/types/database";
 import { format } from "date-fns";
 import {
   AlertDialog,
@@ -52,6 +52,7 @@ interface PersonDetailDrawerProps {
   isDeletingRelationship?: boolean;
   onUpdateRelationship: (data: { id: string; relationship_type?: RelationshipType; by_marriage?: boolean }) => void;
   isUpdatingRelationship?: boolean;
+  onCreateRelationship: (data: CreateRelationshipInput) => void;
 }
 
 const getRelationshipLabel = (type: RelationshipType, relatedPerson: TreeMember | undefined, isFromPerson: boolean): string => {
@@ -217,12 +218,15 @@ export function PersonDetailDrawer({
   isDeletingRelationship,
   onUpdateRelationship,
   isUpdatingRelationship,
+  onCreateRelationship,
 }: PersonDetailDrawerProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showDeleteRelDialog, setShowDeleteRelDialog] = useState<string | null>(null);
   const [editingRelationship, setEditingRelationship] = useState<Relationship | null>(null);
   const [editRelType, setEditRelType] = useState<RelationshipType>("parent");
   const [editByMarriage, setEditByMarriage] = useState(false);
+  const [editToPersonId, setEditToPersonId] = useState("");
+  const [editOriginalRelatedId, setEditOriginalRelatedId] = useState("");
   const [newNote, setNewNote] = useState("");
   const [showExtendedFamily, setShowExtendedFamily] = useState(false);
   
@@ -264,15 +268,33 @@ export function PersonDetailDrawer({
     setEditingRelationship(rel);
     setEditRelType(rel.relationship_type);
     setEditByMarriage(rel.by_marriage || false);
+    const relatedId = rel.from_person_id === person.id ? rel.to_person_id : rel.from_person_id;
+    setEditToPersonId(relatedId);
+    setEditOriginalRelatedId(relatedId);
   };
 
   const handleSaveRelationship = () => {
-    if (!editingRelationship) return;
-    onUpdateRelationship({
-      id: editingRelationship.id,
-      relationship_type: editRelType,
-      by_marriage: editByMarriage,
-    });
+    if (!editingRelationship || !person) return;
+
+    if (editToPersonId !== editOriginalRelatedId) {
+      // Person changed: delete old, create new with correct direction
+      onDeleteRelationship(editingRelationship.id);
+      const fromId = editingRelationship.from_person_id === person.id ? person.id : editToPersonId;
+      const toId = editingRelationship.from_person_id === person.id ? editToPersonId : person.id;
+      onCreateRelationship({
+        family_tree_id: editingRelationship.family_tree_id,
+        from_person_id: fromId,
+        to_person_id: toId,
+        relationship_type: editRelType,
+        by_marriage: editByMarriage,
+      });
+    } else {
+      onUpdateRelationship({
+        id: editingRelationship.id,
+        relationship_type: editRelType,
+        by_marriage: editByMarriage,
+      });
+    }
     setEditingRelationship(null);
   };
 
@@ -746,6 +768,21 @@ export function PersonDetailDrawer({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Related Person</Label>
+              <Select value={editToPersonId} onValueChange={setEditToPersonId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a person" />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.filter(m => m.id !== person.id).map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.first_name} {member.last_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-2">
               <Label>Relationship Type</Label>
               <Select
