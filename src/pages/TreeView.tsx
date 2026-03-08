@@ -175,7 +175,7 @@ const TreeView = () => {
 
   const handleUpdateRelationship = async (data: { 
     id: string; 
-    relationship_type?: "parent" | "child" | "spouse" | "sibling" | "partner"; 
+    relationship_type?: RelationshipType; 
     by_marriage?: boolean 
   }) => {
     await updateRelationship.mutateAsync(data);
