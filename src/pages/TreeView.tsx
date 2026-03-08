@@ -172,6 +172,8 @@ const TreeView = () => {
       setIsExporting(false);
     }
   };
+
+  const handleInviteSubmit = async (data: { email: string; role: CollaboratorRole }) => {
     if (!treeId) return;
     await sendInvite.mutateAsync({
       family_tree_id: treeId,
