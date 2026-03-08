@@ -443,40 +443,6 @@ const TreeView = () => {
             </Button>
           </div>
 
-          {/* Legend */}
-          {members.length > 0 && (
-            <div className="fixed bottom-6 left-6 z-10 bg-card shadow-soft rounded-xl border border-border p-3">
-              <p className="text-xs font-medium text-muted-foreground mb-2">Legend</p>
-              <div className="flex flex-col gap-2">
-                {/* Parent / Child */}
-                <div className="flex items-center gap-2">
-                  <svg width="30" height="24" viewBox="0 0 30 24" className="shrink-0">
-                    <line x1="15" y1="2" x2="15" y2="18" stroke="currentColor" strokeWidth="2" className="text-muted-foreground" />
-                    <polygon points="10,16 15,22 20,16" fill="currentColor" className="text-muted-foreground" />
-                  </svg>
-                  <span className="text-xs text-foreground">Parent / Child</span>
-                </div>
-                {/* Spouse / Partner */}
-                <div className="flex items-center gap-2">
-                  <svg width="30" height="24" viewBox="0 0 30 24" className="shrink-0">
-                    <line x1="0" y1="12" x2="11" y2="12" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" className="text-muted-foreground" />
-                    <line x1="19" y1="12" x2="30" y2="12" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" className="text-muted-foreground" />
-                    <text x="15" y="16" textAnchor="middle" fontSize="12" fill="currentColor" className="text-primary">♥</text>
-                  </svg>
-                  <span className="text-xs text-foreground">Spouse / Partner</span>
-                </div>
-                {/* By marriage */}
-                <div className="flex items-center gap-2">
-                  <svg width="30" height="24" viewBox="0 0 30 24" className="shrink-0">
-                    <line x1="0" y1="12" x2="11" y2="12" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" className="text-muted-foreground" />
-                    <line x1="19" y1="12" x2="30" y2="12" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" className="text-muted-foreground" />
-                    <text x="15" y="16" textAnchor="middle" fontSize="12" fill="currentColor" className="text-primary">♥</text>
-                  </svg>
-                  <span className="text-xs text-foreground">by marriage <span className="text-muted-foreground">(step)</span></span>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Minimap Overview */}
           {members.length > 0 && (
