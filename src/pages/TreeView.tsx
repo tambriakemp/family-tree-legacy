@@ -460,10 +460,8 @@ const TreeView = () => {
           )}
 
           {/* Tree Visualization */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full min-h-full flex items-start justify-center p-8"
+          <div
+            className="w-full min-h-full flex items-start justify-center p-8 transition-opacity duration-300"
             style={{ 
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, 
               transformOrigin: "top center",
@@ -520,7 +518,7 @@ const TreeView = () => {
                 })}
               </svg>
             )}
-          </motion.div>
+          </div>
         </div>
       </main>
 
