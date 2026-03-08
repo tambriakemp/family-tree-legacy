@@ -46,6 +46,7 @@ const TreeView = () => {
   const [defaultRelationType, setDefaultRelationType] = useState<RelationshipType>("parent");
   const [relationshipDescriptionText, setRelationshipDescriptionText] = useState<string | undefined>();
   const [siblingMode, setSiblingMode] = useState(false);
+  const [siblingParentIds, setSiblingParentIds] = useState<string[]>([]);
   const [lockedRelationType, setLockedRelationType] = useState<RelationshipType | undefined>();
   const [isChildMode, setIsChildMode] = useState(false);
   const [viewportSize, setViewportSize] = useState({ width: 800, height: 600 });
