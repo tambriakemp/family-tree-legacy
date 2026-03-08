@@ -44,6 +44,7 @@ interface PersonDetailDrawerProps {
   onEdit: () => void;
   onDelete: () => void;
   onAddRelationship: (type: RelationshipType) => void;
+  onAddSibling: () => void;
   isDeleting?: boolean;
   onDeleteRelationship: (id: string) => void;
   isDeletingRelationship?: boolean;
