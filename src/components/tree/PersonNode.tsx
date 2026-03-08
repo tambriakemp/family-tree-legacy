@@ -40,7 +40,7 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
       {/* Avatar circle */}
       {person.profile_photo_url ? (
         <clipPath id={`avatar-clip-${person.id}`}>
-          <circle cx={x + 35} cy={y + 40} r={20} />
+          <circle cx={x + 35} cy={y + 48} r={20} />
         </clipPath>
       ) : null}
       
