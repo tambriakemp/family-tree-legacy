@@ -35,6 +35,7 @@ export function RelationshipFormDialog({
   isLoading,
   existingRelationships = [],
   defaultRelationType,
+  descriptionText,
 }: RelationshipFormDialogProps) {
   const [toPersonId, setToPersonId] = useState("");
   const [relationshipType, setRelationshipType] = useState<RelationshipType>(defaultRelationType || "parent");
