@@ -52,6 +52,7 @@ interface PersonDetailDrawerProps {
   isDeletingRelationship?: boolean;
   onUpdateRelationship: (data: { id: string; relationship_type?: RelationshipType; by_marriage?: boolean }) => void;
   isUpdatingRelationship?: boolean;
+  onCreateRelationship: (data: CreateRelationshipInput) => void;
 }
 
 const getRelationshipLabel = (type: RelationshipType, relatedPerson: TreeMember | undefined, isFromPerson: boolean): string => {
