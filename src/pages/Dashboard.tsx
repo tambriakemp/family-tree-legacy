@@ -42,8 +42,16 @@ const Dashboard = () => {
   
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [treeToDelete, setTreeToDelete] = useState<string | null>(null);
-  
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
+  // Handle checkout success
+  useEffect(() => {
+    const checkout = searchParams.get("checkout");
+    if (checkout === "success") {
+      toast.success("Subscription activated! Welcome to Pro.");
+      refreshSubscription();
+    }
+  }, [searchParams]);
 
   // Handle invite deep link
   useEffect(() => {
