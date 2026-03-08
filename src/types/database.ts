@@ -123,6 +123,7 @@ export interface UpdateTreeMemberInput {
   last_name?: string;
   birth_date?: string | null;
   death_date?: string | null;
+  gender?: string;
   profile_photo_url?: string | null;
 }
 

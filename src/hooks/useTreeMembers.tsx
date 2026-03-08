@@ -34,6 +34,7 @@ export function useTreeMembers(treeId: string | undefined) {
           last_name: input.last_name || null,
           birth_date: input.birth_date || null,
           death_date: input.death_date || null,
+          gender: input.gender || 'unknown',
           profile_photo_url: input.profile_photo_url || null,
           created_by_user_id: user?.id,
         })

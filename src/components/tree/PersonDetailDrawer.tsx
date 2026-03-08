@@ -51,6 +51,21 @@ interface PersonDetailDrawerProps {
   isUpdatingRelationship?: boolean;
 }
 
+const getRelationshipLabel = (type: RelationshipType, relatedPerson?: TreeMember): string => {
+  if (type === "parent") {
+    if (relatedPerson?.gender === "male") return "Father";
+    if (relatedPerson?.gender === "female") return "Mother";
+    return "Parent";
+  }
+  if (type === "spouse") {
+    if (relatedPerson?.gender === "male") return "Husband";
+    if (relatedPerson?.gender === "female") return "Wife";
+    return "Spouse";
+  }
+  if (type === "partner") return "Partner";
+  return type;
+};
+
 const relationshipLabels: Record<RelationshipType, string> = {
   parent: "Parent",
   spouse: "Spouse",
