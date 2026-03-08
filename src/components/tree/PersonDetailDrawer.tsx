@@ -331,7 +331,7 @@ export function PersonDetailDrawer({
           <Tabs defaultValue="overview" className="mt-6">
             <TabsList className="w-full grid grid-cols-5">
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="relationships">Relations</TabsTrigger>
+              <TabsTrigger value="relationships">Relationships</TabsTrigger>
               <TabsTrigger value="history">History</TabsTrigger>
               <TabsTrigger value="notes">Notes</TabsTrigger>
               <TabsTrigger value="photos">Photos</TabsTrigger>
