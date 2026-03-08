@@ -10,7 +10,7 @@ interface PersonNodeProps {
 }
 
 export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProps) {
-  const fullName = `${person.first_name}${person.last_name ? ` ${person.last_name}` : ""}`;
+  const truncate = (s: string, max: number) => s.length > max ? s.slice(0, max) + "..." : s;
   
   const birthYear = person.birth_date ? new Date(person.birth_date).getFullYear() : null;
   const deathYear = person.death_date ? new Date(person.death_date).getFullYear() : null;
@@ -30,7 +30,7 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
         x={x}
         y={y}
         width={160}
-        height={80}
+        height={96}
         rx={16}
         className={`fill-card stroke-2 shadow-lg ${
           isSelected ? "stroke-primary" : "stroke-primary/50"
@@ -40,7 +40,7 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
       {/* Avatar circle */}
       {person.profile_photo_url ? (
         <clipPath id={`avatar-clip-${person.id}`}>
-          <circle cx={x + 35} cy={y + 40} r={20} />
+          <circle cx={x + 35} cy={y + 48} r={20} />
         </clipPath>
       ) : null}
       
@@ -48,39 +48,51 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
         <image
           href={person.profile_photo_url}
           x={x + 15}
-          y={y + 20}
+          y={y + 28}
           width={40}
           height={40}
           clipPath={`url(#avatar-clip-${person.id})`}
           preserveAspectRatio="xMidYMid slice"
         />
       ) : (
-        <circle cx={x + 35} cy={y + 40} r={20} className="fill-sage-light" />
+        <circle cx={x + 35} cy={y + 48} r={20} className="fill-sage-light" />
       )}
       
       {!person.profile_photo_url && (
-        <foreignObject x={x + 23} y={y + 28} width={24} height={24}>
+        <foreignObject x={x + 23} y={y + 36} width={24} height={24}>
           <User className="w-6 h-6 text-primary/60" />
         </foreignObject>
       )}
       
-      {/* Name */}
+      {/* First name */}
       <text
         x={x + 65}
-        y={y + 35}
+        y={y + 32}
         className="fill-foreground text-sm font-medium"
         style={{ fontSize: "13px" }}
       >
-        {fullName.length > 14 ? fullName.slice(0, 14) + "..." : fullName}
+        {truncate(person.first_name, 16)}
       </text>
+      
+      {/* Last name */}
+      {person.last_name && (
+        <text
+          x={x + 65}
+          y={y + 48}
+          className="fill-muted-foreground"
+          style={{ fontSize: "11px" }}
+        >
+          {truncate(person.last_name, 16)}
+        </text>
+      )}
       
       {/* Date range */}
       {dateRange && (
         <text
           x={x + 65}
-          y={y + 52}
+          y={y + 65}
           className="fill-muted-foreground text-xs"
-          style={{ fontSize: "11px" }}
+          style={{ fontSize: "10px" }}
         >
           {dateRange}
         </text>
