@@ -34,6 +34,7 @@ export interface TreeMember {
   last_name: string | null;
   birth_date: string | null;
   death_date: string | null;
+  gender?: 'male' | 'female' | 'non-binary' | 'unknown';
   profile_photo_url: string | null;
   created_at: string;
   updated_at: string;
