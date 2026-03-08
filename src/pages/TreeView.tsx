@@ -147,7 +147,18 @@ const TreeView = () => {
 
   const handleAddRelationship = (type: RelationshipType) => {
     setDefaultRelationType(type);
-    setRelationshipDescriptionText(undefined);
+    if (type === "parent" && selectedPerson) {
+      setRelationshipDescriptionText(`Select the parent of ${selectedPerson.first_name}${selectedPerson.last_name ? ' ' + selectedPerson.last_name : ''}.`);
+    } else {
+      setRelationshipDescriptionText(undefined);
+    }
+    setSiblingMode(false);
+    setShowRelationshipForm(true);
+  };
+
+  const handleAddChild = () => {
+    setDefaultRelationType("parent");
+    setRelationshipDescriptionText(`Select the child to add. They will be listed as a child of ${selectedPerson?.first_name}${selectedPerson?.last_name ? ' ' + selectedPerson.last_name : ''}.`);
     setSiblingMode(false);
     setShowRelationshipForm(true);
   };
