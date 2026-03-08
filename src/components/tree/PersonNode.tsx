@@ -10,7 +10,7 @@ interface PersonNodeProps {
 }
 
 export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProps) {
-  const fullName = `${person.first_name}${person.last_name ? ` ${person.last_name}` : ""}`;
+  const truncate = (s: string, max: number) => s.length > max ? s.slice(0, max) + "..." : s;
   
   const birthYear = person.birth_date ? new Date(person.birth_date).getFullYear() : null;
   const deathYear = person.death_date ? new Date(person.death_date).getFullYear() : null;
