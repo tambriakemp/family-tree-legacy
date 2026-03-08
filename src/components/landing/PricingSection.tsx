@@ -182,11 +182,16 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Link to="/signup">
-                <Button variant="hero" size="xl" className="w-full">
-                  Start 14-Day Free Trial
-                </Button>
-              </Link>
+              <Button
+                variant="hero"
+                size="xl"
+                className="w-full"
+                onClick={handleSubscribe}
+                disabled={isLoading}
+              >
+                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {user ? `Subscribe – $${STRIPE_PLANS[selectedPlan].price}/${selectedPlan === "yearly" ? "yr" : "mo"}` : "Start 14-Day Free Trial"}
+              </Button>
 
               <p className="text-center text-sm text-muted-foreground mt-4">
                 No credit card required • Cancel anytime
