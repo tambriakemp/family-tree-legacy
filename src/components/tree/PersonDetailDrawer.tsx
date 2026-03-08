@@ -225,6 +225,8 @@ export function PersonDetailDrawer({
   const [editingRelationship, setEditingRelationship] = useState<Relationship | null>(null);
   const [editRelType, setEditRelType] = useState<RelationshipType>("parent");
   const [editByMarriage, setEditByMarriage] = useState(false);
+  const [editToPersonId, setEditToPersonId] = useState("");
+  const [editOriginalRelatedId, setEditOriginalRelatedId] = useState("");
   const [newNote, setNewNote] = useState("");
   const [showExtendedFamily, setShowExtendedFamily] = useState(false);
   
