@@ -47,6 +47,7 @@ const TreeView = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showGedcomImport, setShowGedcomImport] = useState(false);
   const { toast } = useToast();
 
   // Onboarding tooltip after first person added
