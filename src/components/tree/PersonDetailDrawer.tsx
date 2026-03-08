@@ -218,7 +218,11 @@ export function PersonDetailDrawer({
                     variant="outline"
                     size="sm"
                     className="justify-start"
-                    onClick={() => onAddRelationship("sibling")}
+                    onClick={() => {
+                      import("sonner").then(({ toast }) => {
+                        toast.info("To add a sibling, add a shared parent to both people in the tree.");
+                      });
+                    }}
                   >
                     <Users className="w-4 h-4 mr-2" />
                     Add Sibling
