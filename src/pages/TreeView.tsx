@@ -423,20 +423,6 @@ const TreeView = () => {
             >
               <ZoomIn className="w-4 h-4" />
             </Button>
-            <div className="bg-card shadow-soft rounded-md border border-border px-2 py-3 flex flex-col items-center">
-              <input
-                type="range"
-                min="50"
-                max="200"
-                step="5"
-                value={Math.round(zoom * 100)}
-                onChange={(e) => setZoom(Number(e.target.value) / 100)}
-                className="h-24 accent-primary cursor-pointer"
-                style={{ writingMode: "vertical-lr", direction: "rtl" }}
-                title={`Zoom: ${Math.round(zoom * 100)}%`}
-              />
-              <span className="text-[10px] text-muted-foreground mt-1">{Math.round(zoom * 100)}%</span>
-            </div>
             <Button
               variant="outline"
               size="icon"
