@@ -353,6 +353,7 @@ export type Database = {
           death_date: string | null
           family_tree_id: string
           first_name: string
+          gender: string | null
           id: string
           last_name: string | null
           profile_photo_url: string | null
@@ -365,6 +366,7 @@ export type Database = {
           death_date?: string | null
           family_tree_id: string
           first_name: string
+          gender?: string | null
           id?: string
           last_name?: string | null
           profile_photo_url?: string | null
@@ -377,6 +379,7 @@ export type Database = {
           death_date?: string | null
           family_tree_id?: string
           first_name?: string
+          gender?: string | null
           id?: string
           last_name?: string | null
           profile_photo_url?: string | null

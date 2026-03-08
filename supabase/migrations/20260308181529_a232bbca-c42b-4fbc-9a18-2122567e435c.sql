@@ -1,0 +1,1 @@
+ALTER TABLE public.tree_members ADD COLUMN IF NOT EXISTS gender text DEFAULT 'unknown';
