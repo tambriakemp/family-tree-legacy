@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download } from "lucide-react";
+import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download, TreeDeciduous } from "lucide-react";
 import html2canvas from "html2canvas";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,22 @@ const TreeView = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const { toast } = useToast();
+
+  // Onboarding tooltip after first person added
+  useEffect(() => {
+    if (members.length === 1 && !localStorage.getItem("familyflow-onboarding-dismissed")) {
+      setShowOnboarding(true);
+    } else if (members.length > 1) {
+      setShowOnboarding(false);
+    }
+  }, [members.length]);
+
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    localStorage.setItem("familyflow-onboarding-dismissed", "true");
+  };
 
   // Use hierarchical tree layout
   const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
@@ -283,6 +298,18 @@ const TreeView = () => {
           onMouseLeave={handleMouseLeave}
           onWheel={handleWheel}
         >
+          {/* Onboarding tooltip */}
+          {showOnboarding && members.length === 1 && (
+            <div className="fixed top-24 left-1/2 -translate-x-1/2 z-20 rounded-xl bg-card border border-primary/40 shadow-lg p-4 max-w-sm text-center">
+              <TreeDeciduous className="w-6 h-6 text-primary mx-auto mb-2" />
+              <h3 className="font-display font-semibold text-foreground mb-1">Great start!</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Now click on <span className="font-medium text-foreground">{members[0].first_name}</span> to add their parents, spouse, or children and grow your tree.
+              </p>
+              <Button size="sm" onClick={dismissOnboarding}>Got it!</Button>
+            </div>
+          )}
+
           {/* Zoom controls */}
           <div className="fixed bottom-6 right-6 flex flex-col gap-2 z-10">
             <Button
