@@ -59,7 +59,7 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
       )}
       
       {!person.profile_photo_url && (
-        <foreignObject x={x + 23} y={y + 28} width={24} height={24}>
+        <foreignObject x={x + 23} y={y + 36} width={24} height={24}>
           <User className="w-6 h-6 text-primary/60" />
         </foreignObject>
       )}
