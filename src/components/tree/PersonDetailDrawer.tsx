@@ -384,50 +384,39 @@ export function PersonDetailDrawer({
 
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-3">
-                  Relationships ({personRelationships.length})
+                  Relationships
                 </h4>
-                {personRelationships.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">
-                    No relationships defined yet
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {personRelationships.slice(0, 4).map((rel) => {
-                      const relatedId =
-                        rel.from_person_id === person.id
-                          ? rel.to_person_id
-                          : rel.from_person_id;
-                      const related = getRelatedPerson(relatedId);
-                      if (!related) return null;
-                      
-                      return (
-                        <div
-                          key={rel.id}
-                          className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-sage-light flex items-center justify-center">
-                              <User className="w-4 h-4 text-primary/60" />
-                            </div>
-                            <span className="text-sm font-medium">
-                              {related.first_name} {related.last_name}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {rel.by_marriage && (
-                              <Badge variant="secondary" className="text-xs">
-                                by marriage
-                              </Badge>
-                            )}
-                            <Badge variant="outline">
-                              {getRelationshipLabel(rel.relationship_type, related, rel.from_person_id === person.id)}
-                            </Badge>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                {(() => {
+                  const parentCount = personRelationships.filter(
+                    r => r.relationship_type === "parent" && r.to_person_id === person.id
+                  ).length;
+                  const childCount = personRelationships.filter(
+                    r => r.relationship_type === "parent" && r.from_person_id === person.id
+                  ).length;
+                  const spousePartnerCount = personRelationships.filter(
+                    r => r.relationship_type === "spouse" || r.relationship_type === "partner"
+                  ).length;
+                  const pills = [
+                    parentCount > 0 && `${parentCount} Parent${parentCount > 1 ? "s" : ""}`,
+                    childCount > 0 && `${childCount} Child${childCount > 1 ? "ren" : ""}`,
+                    spousePartnerCount > 0 && `${spousePartnerCount} Spouse/Partner${spousePartnerCount > 1 ? "s" : ""}`,
+                  ].filter(Boolean);
+
+                  return pills.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {pills.map((pill) => (
+                        <span key={pill as string} className="bg-muted rounded px-2 py-0.5 text-xs text-muted-foreground">
+                          {pill}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">
+                      No relationships yet — use Quick Actions to add
+                    </p>
+                  );
+                })()}
+              </div>
               </div>
             </TabsContent>
 
