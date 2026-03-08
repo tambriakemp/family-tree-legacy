@@ -518,7 +518,7 @@ const TreeView = () => {
                 })}
               </svg>
             )}
-          </motion.div>
+          </div>
         </div>
       </main>
 
