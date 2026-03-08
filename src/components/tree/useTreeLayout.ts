@@ -58,16 +58,7 @@ export function useTreeLayout(
         const parents = childParentMap.get(rel.to_person_id) || [];
         parents.push(rel.from_person_id);
         childParentMap.set(rel.to_person_id, parents);
-      } else if (rel.relationship_type === "child") {
-        // from_person is child of to_person
-        const children = parentChildMap.get(rel.to_person_id) || [];
-        children.push(rel.from_person_id);
-        parentChildMap.set(rel.to_person_id, children);
-
-        const parents = childParentMap.get(rel.from_person_id) || [];
-        parents.push(rel.to_person_id);
-        childParentMap.set(rel.from_person_id, parents);
-      } else if (rel.relationship_type === "spouse" || rel.relationship_type === "partner") {
+    } else if (rel.relationship_type === "spouse" || rel.relationship_type === "partner") {
         spouseMap.set(rel.from_person_id, rel.to_person_id);
         spouseMap.set(rel.to_person_id, rel.from_person_id);
       }

@@ -59,7 +59,6 @@ const relationshipLabels: Record<RelationshipType, string> = {
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
   { value: "parent", label: "Parent" },
-  { value: "child", label: "Child" },
   { value: "spouse", label: "Spouse" },
   { value: "sibling", label: "Sibling" },
   { value: "partner", label: "Partner" },
