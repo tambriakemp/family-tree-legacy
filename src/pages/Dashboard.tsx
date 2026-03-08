@@ -32,7 +32,7 @@ import { format } from "date-fns";
 import type { TreeCollaboratorWithTree } from "@/types/database";
 
 const Dashboard = () => {
-  const { user, isLoading: authLoading, signOut } = useAuth();
+  const { user, isLoading: authLoading, signOut, subscription, refreshSubscription } = useAuth();
   const navigate = useNavigate();
   const { trees, isLoading: treesLoading, createTree, deleteTree } = useFamilyTrees();
   const { pendingInvites, acceptInvite, declineInvite } = usePendingInvites();
