@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { TreeMember, CreateTreeMemberInput, UpdateTreeMemberInput } from "@/types/database";
 
 interface PersonFormDialogProps {
@@ -26,6 +27,7 @@ export function PersonFormDialog({
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [deathDate, setDeathDate] = useState("");
+  const [gender, setGender] = useState("unknown");
 
   const isEditing = !!person;
 
@@ -35,11 +37,13 @@ export function PersonFormDialog({
       setLastName(person.last_name || "");
       setBirthDate(person.birth_date || "");
       setDeathDate(person.death_date || "");
+      setGender(person.gender || "unknown");
     } else {
       setFirstName("");
       setLastName("");
       setBirthDate("");
       setDeathDate("");
+      setGender("unknown");
     }
   }, [person, open]);
 
@@ -55,6 +59,7 @@ export function PersonFormDialog({
         last_name: lastName.trim() || null,
         birth_date: birthDate || null,
         death_date: deathDate || null,
+        gender,
       });
     } else {
       onSubmit({
@@ -63,6 +68,7 @@ export function PersonFormDialog({
         last_name: lastName.trim() || undefined,
         birth_date: birthDate || undefined,
         death_date: deathDate || undefined,
+        gender,
       });
     }
   };
@@ -96,6 +102,20 @@ export function PersonFormDialog({
                 placeholder="Smith"
               />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="gender">Gender</Label>
+            <Select value={gender} onValueChange={setGender}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="non-binary">Non-binary</SelectItem>
+                <SelectItem value="unknown">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
