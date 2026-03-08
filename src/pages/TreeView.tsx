@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download, TreeDeciduous, Upload } from "lucide-react";
