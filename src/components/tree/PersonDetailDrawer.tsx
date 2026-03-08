@@ -417,7 +417,6 @@ export function PersonDetailDrawer({
                   );
                 })()}
               </div>
-              </div>
             </TabsContent>
 
             <TabsContent value="relationships" className="mt-4">
