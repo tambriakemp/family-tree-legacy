@@ -52,7 +52,6 @@ interface PersonDetailDrawerProps {
 
 const relationshipLabels: Record<RelationshipType, string> = {
   parent: "Parent",
-  child: "Child",
   spouse: "Spouse",
   sibling: "Sibling",
   partner: "Partner",
@@ -60,7 +59,6 @@ const relationshipLabels: Record<RelationshipType, string> = {
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
   { value: "parent", label: "Parent" },
-  { value: "child", label: "Child" },
   { value: "spouse", label: "Spouse" },
   { value: "sibling", label: "Sibling" },
   { value: "partner", label: "Partner" },
@@ -204,7 +202,7 @@ export function PersonDetailDrawer({
                     variant="outline"
                     size="sm"
                     className="justify-start"
-                    onClick={() => onAddRelationship("child")}
+                    onClick={() => onAddRelationship("parent")}
                   >
                     <ArrowDown className="w-4 h-4 mr-2" />
                     Add Child
