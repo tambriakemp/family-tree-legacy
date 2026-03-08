@@ -219,9 +219,7 @@ export function PersonDetailDrawer({
                     size="sm"
                     className="justify-start"
                     onClick={() => {
-                      import("sonner").then(({ toast }) => {
-                        toast.info("To add a sibling, add a shared parent to both people in the tree.");
-                      });
+                      toast.info("To add a sibling, add a shared parent to both people in the tree.");
                     }}
                   >
                     <Users className="w-4 h-4 mr-2" />
