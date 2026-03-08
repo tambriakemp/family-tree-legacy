@@ -2,7 +2,7 @@
 
 export type CollaboratorRole = 'owner' | 'editor' | 'viewer';
 export type InviteStatus = 'pending' | 'accepted' | 'declined';
-export type RelationshipType = 'parent' | 'spouse' | 'sibling' | 'partner';
+export type RelationshipType = 'parent' | 'spouse' | 'partner';
 
 export interface Profile {
   id: string;
