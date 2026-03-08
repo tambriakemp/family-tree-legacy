@@ -51,11 +51,19 @@ interface PersonDetailDrawerProps {
   isUpdatingRelationship?: boolean;
 }
 
-const getRelationshipLabel = (type: RelationshipType, relatedPerson?: TreeMember): string => {
+const getRelationshipLabel = (type: RelationshipType, relatedPerson: TreeMember | undefined, isFromPerson: boolean): string => {
   if (type === "parent") {
-    if (relatedPerson?.gender === "male") return "Father";
-    if (relatedPerson?.gender === "female") return "Mother";
-    return "Parent";
+    if (isFromPerson) {
+      // Viewed person is the parent, related person is the child
+      if (relatedPerson?.gender === "male") return "Son";
+      if (relatedPerson?.gender === "female") return "Daughter";
+      return "Child";
+    } else {
+      // Viewed person is the child, related person is the parent
+      if (relatedPerson?.gender === "male") return "Father";
+      if (relatedPerson?.gender === "female") return "Mother";
+      return "Parent";
+    }
   }
   if (type === "spouse") {
     if (relatedPerson?.gender === "male") return "Husband";
