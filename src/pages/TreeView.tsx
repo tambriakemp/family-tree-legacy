@@ -147,12 +147,26 @@ const TreeView = () => {
 
   const handleAddRelationship = (type: RelationshipType) => {
     setDefaultRelationType(type);
+    setRelationshipDescriptionText(undefined);
+    setSiblingMode(false);
+    setShowRelationshipForm(true);
+  };
+
+  const handleAddSibling = () => {
+    setDefaultRelationType("parent");
+    setRelationshipDescriptionText("Select this person's parent to link them as a sibling. Any existing children of that parent will automatically be siblings.");
+    setSiblingMode(true);
     setShowRelationshipForm(true);
   };
 
   const handleRelationshipSubmit = async (data: Parameters<typeof createRelationship.mutateAsync>[0]) => {
     await createRelationship.mutateAsync(data);
     setShowRelationshipForm(false);
+    if (siblingMode) {
+      toast({ title: "Sibling added via shared parent!" });
+      setSiblingMode(false);
+    }
+    setRelationshipDescriptionText(undefined);
   };
 
   const handleDeleteRelationship = async (id: string) => {
