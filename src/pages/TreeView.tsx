@@ -108,6 +108,15 @@ const TreeView = () => {
     return () => window.removeEventListener("resize", updateViewportSize);
   }, []);
 
+  const handleUpdateTreeName = (name: string) => {
+    if (!treeId) return;
+    updateTree.mutate({ id: treeId, title: name }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["family-tree", treeId] });
+      },
+    });
+  };
+
   const isLoading = treeLoading || membersLoading;
 
   const handleZoomIn = () => setZoom((z) => Math.min(z + 0.2, 2));
