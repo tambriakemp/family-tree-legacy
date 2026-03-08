@@ -55,7 +55,7 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
           preserveAspectRatio="xMidYMid slice"
         />
       ) : (
-        <circle cx={x + 35} cy={y + 40} r={20} className="fill-sage-light" />
+        <circle cx={x + 35} cy={y + 48} r={20} className="fill-sage-light" />
       )}
       
       {!person.profile_photo_url && (
