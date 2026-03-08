@@ -274,12 +274,27 @@ export function PersonDetailDrawer({
   };
 
   const handleSaveRelationship = () => {
-    if (!editingRelationship) return;
-    onUpdateRelationship({
-      id: editingRelationship.id,
-      relationship_type: editRelType,
-      by_marriage: editByMarriage,
-    });
+    if (!editingRelationship || !person) return;
+
+    if (editToPersonId !== editOriginalRelatedId) {
+      // Person changed: delete old, create new with correct direction
+      onDeleteRelationship(editingRelationship.id);
+      const fromId = editingRelationship.from_person_id === person.id ? person.id : editToPersonId;
+      const toId = editingRelationship.from_person_id === person.id ? editToPersonId : person.id;
+      onCreateRelationship({
+        family_tree_id: editingRelationship.family_tree_id,
+        from_person_id: fromId,
+        to_person_id: toId,
+        relationship_type: editRelType,
+        by_marriage: editByMarriage,
+      });
+    } else {
+      onUpdateRelationship({
+        id: editingRelationship.id,
+        relationship_type: editRelType,
+        by_marriage: editByMarriage,
+      });
+    }
     setEditingRelationship(null);
   };
 
