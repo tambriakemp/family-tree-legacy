@@ -259,19 +259,6 @@ export function useTreeLayout(
           type: "parent-child",
           path: `M${parentX} ${parentY} L${parentX} ${midY} L${childX} ${midY} L${childX} ${childY}`,
         });
-      } else if (rel.relationship_type === "child") {
-        // Reverse: from is child, to is parent
-        const parentX = toPos.x + nodeWidth / 2;
-        const parentY = toPos.y + nodeHeight;
-        const childX = fromPos.x + nodeWidth / 2;
-        const childY = fromPos.y;
-        const midY = (parentY + childY) / 2;
-
-        connections.push({
-          id: rel.id,
-          type: "parent-child",
-          path: `M${parentX} ${parentY} L${parentX} ${midY} L${childX} ${midY} L${childX} ${childY}`,
-        });
       }
     });
 

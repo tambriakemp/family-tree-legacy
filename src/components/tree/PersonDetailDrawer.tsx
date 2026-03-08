@@ -202,7 +202,7 @@ export function PersonDetailDrawer({
                     variant="outline"
                     size="sm"
                     className="justify-start"
-                    onClick={() => onAddRelationship("child")}
+                    onClick={() => onAddRelationship("parent")}
                   >
                     <ArrowDown className="w-4 h-4 mr-2" />
                     Add Child
