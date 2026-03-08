@@ -31,6 +31,7 @@ const TreeView = () => {
   const { relationships, createRelationship, deleteRelationship, updateRelationship } = useRelationships(treeId);
   const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const isOwner = tree?.owner_user_id === user?.id;
 
