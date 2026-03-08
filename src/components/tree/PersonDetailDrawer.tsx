@@ -97,6 +97,7 @@ export function PersonDetailDrawer({
   onEdit,
   onDelete,
   onAddRelationship,
+  onAddChild,
   onAddSibling,
   isDeleting,
   onDeleteRelationship,
