@@ -193,6 +193,14 @@ const TreeView = () => {
               onClick={() => setShowCollaboratorList(true)}
             >
               <Users className="w-4 h-4 mr-2" />
+              Collaborators
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowInviteDialog(true)}
+            >
+              <UserPlus className="w-4 h-4 mr-2" />
               Invite
             </Button>
             <Button variant="default" size="sm" onClick={handleAddPerson}>
