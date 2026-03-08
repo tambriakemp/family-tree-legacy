@@ -44,6 +44,7 @@ interface PersonDetailDrawerProps {
   onEdit: () => void;
   onDelete: () => void;
   onAddRelationship: (type: RelationshipType) => void;
+  onAddChild: () => void;
   onAddSibling: () => void;
   isDeleting?: boolean;
   onDeleteRelationship: (id: string) => void;
@@ -96,6 +97,7 @@ export function PersonDetailDrawer({
   onEdit,
   onDelete,
   onAddRelationship,
+  onAddChild,
   onAddSibling,
   isDeleting,
   onDeleteRelationship,
@@ -226,7 +228,7 @@ export function PersonDetailDrawer({
                     variant="outline"
                     size="sm"
                     className="justify-start"
-                    onClick={() => onAddRelationship("parent")}
+                    onClick={() => onAddChild()}
                   >
                     <ArrowDown className="w-4 h-4 mr-2" />
                     Add Child
