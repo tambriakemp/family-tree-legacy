@@ -40,39 +40,7 @@ const Dashboard = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [treeToDelete, setTreeToDelete] = useState<string | null>(null);
   
-  // Show debug panel only when ?debug=1 is present
-  const showDebug = searchParams.get("debug") === "1";
-  
-  // Debug state for RLS investigation (only load when needed)
-  const [debugInfo, setDebugInfo] = useState<{
-    sessionUserId: string | null;
-    dbAuthUid: string | null;
-    dbJwtSub: string | null;
-    dbJwtRole: string | null;
-    error: string | null;
-  } | null>(null);
 
-  // Debug function to check what Postgres sees (only when debug mode is active)
-  useEffect(() => {
-    if (!showDebug || !user) return;
-    
-    const checkDebugContext = async () => {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { data: session } = await supabase.auth.getSession();
-      
-      const { data, error } = await supabase.rpc('debug_request_context');
-      
-      setDebugInfo({
-        sessionUserId: session?.session?.user?.id || null,
-        dbAuthUid: data?.[0]?.auth_uid || null,
-        dbJwtSub: data?.[0]?.jwt_sub || null,
-        dbJwtRole: data?.[0]?.jwt_role || null,
-        error: error?.message || null,
-      });
-    };
-    
-    checkDebugContext();
-  }, [user, showDebug]);
 
   // Handle invite deep link
   useEffect(() => {
@@ -135,22 +103,6 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {/* DEBUG: RLS Investigation Panel - Only visible with ?debug=1 */}
-        {showDebug && debugInfo && (
-          <div className="mb-6 p-4 rounded-lg border border-accent bg-accent/10">
-            <h3 className="font-semibold text-accent-foreground mb-2">🔍 RLS Debug Info</h3>
-            <div className="text-sm font-mono space-y-1">
-              <p><strong>Session User ID:</strong> {debugInfo.sessionUserId || 'null'}</p>
-              <p><strong>DB auth.uid():</strong> {debugInfo.dbAuthUid || 'null'}</p>
-              <p><strong>DB JWT sub:</strong> {debugInfo.dbJwtSub || 'null'}</p>
-              <p><strong>DB JWT role:</strong> {debugInfo.dbJwtRole || 'null'}</p>
-              {debugInfo.error && <p className="text-destructive"><strong>Error:</strong> {debugInfo.error}</p>}
-              <p className="mt-2 text-muted-foreground">
-                {debugInfo.dbAuthUid ? '✅ Postgres sees auth.uid() correctly' : '❌ Postgres sees auth.uid() as NULL - JWT not being parsed'}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Pending Invites */}
         <PendingInvitesCard
