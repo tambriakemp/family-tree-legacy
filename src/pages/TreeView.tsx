@@ -173,10 +173,32 @@ const TreeView = () => {
   };
 
   const handleAddSibling = () => {
+    if (!selectedPerson) return;
+
+    // Find this person's existing parents (relationships where type=parent and to_person_id=selectedPerson)
+    const parentIds = relationships
+      .filter(r => r.relationship_type === "parent" && r.to_person_id === selectedPerson.id)
+      .map(r => r.from_person_id);
+
+    if (parentIds.length === 0) {
+      toast({
+        title: "No parents found",
+        description: "Add a parent to this person first, then siblings will be automatically inferred from shared parents.",
+      });
+      return;
+    }
+
+    // Get the first parent's name for the description
+    const firstParent = members.find(m => m.id === parentIds[0]);
+    const parentName = firstParent
+      ? `${firstParent.first_name}${firstParent.last_name ? ' ' + firstParent.last_name : ''}`
+      : "their parent";
+
     setDefaultRelationType("parent");
     setLockedRelationType("parent");
     setIsChildMode(false);
-    setRelationshipDescriptionText("Select the shared parent for this sibling relationship.");
+    setSiblingParentIds(parentIds);
+    setRelationshipDescriptionText(`Select a person to become a sibling. They will share ${parentName}'s parentage.`);
     setSiblingMode(true);
     setShowRelationshipForm(true);
   };
