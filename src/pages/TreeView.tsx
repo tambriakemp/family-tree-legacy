@@ -529,6 +529,8 @@ const TreeView = () => {
         existingRelationships={relationships}
         defaultRelationType={defaultRelationType}
         descriptionText={relationshipDescriptionText}
+        lockedRelationType={lockedRelationType}
+        isChildMode={isChildMode}
       />
 
       <PersonDetailDrawer
