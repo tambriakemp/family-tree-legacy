@@ -16,6 +16,7 @@ interface RelationshipFormDialogProps {
   isLoading?: boolean;
   existingRelationships?: { from_person_id: string; to_person_id: string }[];
   defaultRelationType?: RelationshipType;
+  descriptionText?: string;
 }
 
 const relationshipTypes: { value: RelationshipType; label: string }[] = [
