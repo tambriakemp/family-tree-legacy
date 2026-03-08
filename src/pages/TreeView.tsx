@@ -533,8 +533,8 @@ const TreeView = () => {
         onOpenChange={setShowGedcomImport}
         treeId={treeId || ""}
         onSuccess={() => {
-          // Invalidate all tree-related queries
-          import("@tanstack/react-query").then(({ useQueryClient }) => {});
+          queryClient.invalidateQueries({ queryKey: ["tree-members", treeId] });
+          queryClient.invalidateQueries({ queryKey: ["relationships", treeId] });
         }}
       />
     </div>
