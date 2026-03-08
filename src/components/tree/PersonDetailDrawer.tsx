@@ -340,7 +340,7 @@ export function PersonDetailDrawer({
                               {related.first_name} {related.last_name}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {getRelationshipLabel(rel.relationship_type, related)}
+                              {getRelationshipLabel(rel.relationship_type, related, rel.from_person_id === person.id)}
                               {rel.by_marriage && " (by marriage)"}
                             </p>
                           </div>
