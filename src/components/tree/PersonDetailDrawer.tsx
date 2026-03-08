@@ -498,6 +498,46 @@ export function PersonDetailDrawer({
                   })}
                 </div>
               )}
+
+              {extendedFamily.length > 0 && (
+                <Collapsible open={showExtendedFamily} onOpenChange={setShowExtendedFamily} className="mt-6">
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full justify-between px-2">
+                      <span className="text-sm font-medium">Extended Family ({extendedFamily.length})</span>
+                      <ChevronRight className={`w-4 h-4 transition-transform ${showExtendedFamily ? "rotate-90" : ""}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 space-y-2">
+                    {extendedFamily.map((ext) => (
+                      <div
+                        key={ext.member.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-sage-light flex items-center justify-center">
+                            {ext.member.profile_photo_url ? (
+                              <img
+                                src={ext.member.profile_photo_url}
+                                alt={`${ext.member.first_name} ${ext.member.last_name || ""}`}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <User className="w-5 h-5 text-primary/60" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {ext.member.first_name} {ext.member.last_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{ext.label}</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">{ext.label}</Badge>
+                      </div>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
+              )}
             </TabsContent>
 
             <TabsContent value="history" className="mt-4">
