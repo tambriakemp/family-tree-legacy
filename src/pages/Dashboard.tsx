@@ -33,6 +33,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { trees, isLoading: treesLoading, createTree, deleteTree } = useFamilyTrees();
   const { pendingInvites, acceptInvite, declineInvite } = usePendingInvites();
+  const treeIds = trees.map((t) => t.id);
+  const { data: memberCounts } = useTreeMemberCounts(treeIds);
   const [searchParams] = useSearchParams();
   
   const [showCreateDialog, setShowCreateDialog] = useState(false);
