@@ -231,6 +231,11 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Created {format(new Date(tree.created_at), "MMM d, yyyy")}
                 </p>
+                <p className="text-xs text-muted-foreground">
+                  {memberCounts && memberCounts[tree.id] > 0
+                    ? `${memberCounts[tree.id]} people`
+                    : "No members yet"}
+                </p>
               </Link>
             </div>
           ))}
