@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Plus, TreeDeciduous, LogOut, Loader2, MoreVertical, Trash2, Edit } from "lucide-react";
+import { Plus, TreeDeciduous, LogOut, Loader2, MoreVertical, Trash2, Edit, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { STRIPE_PLANS } from "@/lib/stripe-plans";
 import { Header } from "@/components/layout/Header";
 import { useFamilyTrees, useTreeMemberCounts } from "@/hooks/useFamilyTrees";
 import { usePendingInvites } from "@/hooks/useCollaborators";
@@ -29,7 +32,7 @@ import { format } from "date-fns";
 import type { TreeCollaboratorWithTree } from "@/types/database";
 
 const Dashboard = () => {
-  const { user, isLoading: authLoading, signOut } = useAuth();
+  const { user, isLoading: authLoading, signOut, subscription, refreshSubscription } = useAuth();
   const navigate = useNavigate();
   const { trees, isLoading: treesLoading, createTree, deleteTree } = useFamilyTrees();
   const { pendingInvites, acceptInvite, declineInvite } = usePendingInvites();
@@ -39,8 +42,16 @@ const Dashboard = () => {
   
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [treeToDelete, setTreeToDelete] = useState<string | null>(null);
-  
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
+  // Handle checkout success
+  useEffect(() => {
+    const checkout = searchParams.get("checkout");
+    if (checkout === "success") {
+      toast.success("Subscription activated! Welcome to Pro.");
+      refreshSubscription();
+    }
+  }, [searchParams]);
 
   // Handle invite deep link
   useEffect(() => {
@@ -74,6 +85,23 @@ const Dashboard = () => {
     if (treeToDelete) {
       await deleteTree.mutateAsync(treeToDelete);
       setTreeToDelete(null);
+    }
+  };
+
+  const handleCheckout = async (planKey: "monthly" | "yearly") => {
+    setCheckoutLoading(planKey);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_PLANS[planKey].price_id },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast.error("Failed to start checkout: " + (err.message || "Unknown error"));
+    } finally {
+      setCheckoutLoading(null);
     }
   };
 
@@ -200,17 +228,52 @@ const Dashboard = () => {
           transition={{ delay: 0.2 }}
           className="mt-12 p-6 rounded-2xl bg-gradient-hero border border-border"
         >
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div>
-              <h3 className="font-display text-xl font-semibold text-foreground mb-1">
-                Free Trial
-              </h3>
-              <p className="text-muted-foreground">
-                Upgrade to unlock unlimited trees and collaborators
-              </p>
+          {subscription.subscribed ? (
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Crown className="w-6 h-6 text-accent" />
+                <div>
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-1">
+                    Pro {subscription.planKey === "yearly" ? "Yearly" : "Monthly"}
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {subscription.subscriptionEnd
+                      ? `Renews ${format(new Date(subscription.subscriptionEnd), "MMM d, yyyy")}`
+                      : "Active subscription"}
+                  </p>
+                </div>
+              </div>
             </div>
-            <Button variant="hero">Upgrade to Pro - $6/mo</Button>
-          </div>
+          ) : (
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-display text-xl font-semibold text-foreground mb-1">
+                  Free Plan
+                </h3>
+                <p className="text-muted-foreground">
+                  Upgrade to unlock unlimited trees and collaborators
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleCheckout("monthly")}
+                  disabled={!!checkoutLoading}
+                >
+                  {checkoutLoading === "monthly" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  $6/mo
+                </Button>
+                <Button
+                  variant="hero"
+                  onClick={() => handleCheckout("yearly")}
+                  disabled={!!checkoutLoading}
+                >
+                  {checkoutLoading === "yearly" && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                  $48/yr (Save 33%)
+                </Button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </main>
 

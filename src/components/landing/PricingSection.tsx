@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { Check, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Check, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { STRIPE_PLANS } from "@/lib/stripe-plans";
+import { toast } from "sonner";
 
 const plans = [
   {
@@ -43,6 +47,28 @@ const plans = [
 
 export function PricingSection() {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSubscribe = async () => {
+    if (!user) {
+      navigate("/signup");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: STRIPE_PLANS[selectedPlan].price_id },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error("Failed to start checkout: " + (err.message || "Unknown error"));
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <section className="py-24 md:py-32 bg-background">
@@ -156,11 +182,16 @@ export function PricingSection() {
                 ))}
               </ul>
 
-              <Link to="/signup">
-                <Button variant="hero" size="xl" className="w-full">
-                  Start 14-Day Free Trial
-                </Button>
-              </Link>
+              <Button
+                variant="hero"
+                size="xl"
+                className="w-full"
+                onClick={handleSubscribe}
+                disabled={isLoading}
+              >
+                {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                {user ? `Subscribe – $${STRIPE_PLANS[selectedPlan].price}/${selectedPlan === "yearly" ? "yr" : "mo"}` : "Start 14-Day Free Trial"}
+              </Button>
 
               <p className="text-center text-sm text-muted-foreground mt-4">
                 No credit card required • Cancel anytime
