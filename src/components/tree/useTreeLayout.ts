@@ -154,7 +154,7 @@ export function useTreeLayout(
       visited.add(unit.primary.id);
 
       // Position spouse
-      if (unit.spouse) {
+      if (unit.spouse && !memberPositions.has(unit.spouse.id)) {
         const spouseX = primaryX + nodeWidth + spouseGap;
         positions.push({ member: unit.spouse, x: spouseX, y });
         memberPositions.set(unit.spouse.id, { x: spouseX, y });
