@@ -135,22 +135,6 @@ const Dashboard = () => {
           </Button>
         </div>
 
-        {/* DEBUG: RLS Investigation Panel - Only visible with ?debug=1 */}
-        {showDebug && debugInfo && (
-          <div className="mb-6 p-4 rounded-lg border border-accent bg-accent/10">
-            <h3 className="font-semibold text-accent-foreground mb-2">🔍 RLS Debug Info</h3>
-            <div className="text-sm font-mono space-y-1">
-              <p><strong>Session User ID:</strong> {debugInfo.sessionUserId || 'null'}</p>
-              <p><strong>DB auth.uid():</strong> {debugInfo.dbAuthUid || 'null'}</p>
-              <p><strong>DB JWT sub:</strong> {debugInfo.dbJwtSub || 'null'}</p>
-              <p><strong>DB JWT role:</strong> {debugInfo.dbJwtRole || 'null'}</p>
-              {debugInfo.error && <p className="text-destructive"><strong>Error:</strong> {debugInfo.error}</p>}
-              <p className="mt-2 text-muted-foreground">
-                {debugInfo.dbAuthUid ? '✅ Postgres sees auth.uid() correctly' : '❌ Postgres sees auth.uid() as NULL - JWT not being parsed'}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Pending Invites */}
         <PendingInvitesCard
