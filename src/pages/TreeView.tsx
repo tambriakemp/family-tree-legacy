@@ -553,8 +553,6 @@ const TreeView = () => {
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
         treeId={treeId || ""}
-        onSubmit={handleInviteSubmit}
-        isLoading={sendInvite.isPending}
       />
 
       <CollaboratorList
