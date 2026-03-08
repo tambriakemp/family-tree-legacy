@@ -181,7 +181,19 @@ const TreeView = () => {
   };
 
   const handleRelationshipSubmit = async (data: Parameters<typeof createRelationship.mutateAsync>[0]) => {
-    await createRelationship.mutateAsync(data);
+    let finalData = { ...data };
+
+    // For Add Parent and Add Sibling: the chosen person is the parent,
+    // so flip direction so from_person_id = chosen person, to_person_id = current person
+    if (lockedRelationType === "parent" && !isChildMode) {
+      finalData = {
+        ...data,
+        from_person_id: data.to_person_id,
+        to_person_id: data.from_person_id,
+      };
+    }
+
+    await createRelationship.mutateAsync(finalData);
     setShowRelationshipForm(false);
     if (siblingMode) {
       toast({ title: "Sibling added via shared parent!" });
