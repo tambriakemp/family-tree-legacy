@@ -28,6 +28,7 @@ import type { TreeMember, RelationshipType, CreateTreeMemberInput, UpdateTreeMem
 const TreeView = () => {
   const { treeId } = useParams<{ treeId: string }>();
   const { data: tree, isLoading: treeLoading } = useFamilyTree(treeId);
+  const { updateTree } = useFamilyTrees();
   const { members, isLoading: membersLoading, createMember, updateMember, deleteMember } = useTreeMembers(treeId);
   const { relationships, createRelationship, deleteRelationship, updateRelationship } = useRelationships(treeId);
   const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
