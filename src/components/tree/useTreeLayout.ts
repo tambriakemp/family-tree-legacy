@@ -78,7 +78,8 @@ export function useTreeLayout(
       if (processedIds.has(root.id)) return;
 
       const spouseId = spouseMap.get(root.id);
-      const spouse = spouseId ? members.find((m) => m.id === spouseId) : undefined;
+      const isSpouseAlsoRoot = spouseId ? roots.some((r) => r.id === spouseId) && processedIds.has(spouseId) : false;
+      const spouse = spouseId && !isSpouseAlsoRoot ? members.find((m) => m.id === spouseId) : undefined;
 
       // Get children of this family unit
       const primaryChildren = parentChildMap.get(root.id) || [];
@@ -154,7 +155,7 @@ export function useTreeLayout(
       visited.add(unit.primary.id);
 
       // Position spouse
-      if (unit.spouse) {
+      if (unit.spouse && !memberPositions.has(unit.spouse.id)) {
         const spouseX = primaryX + nodeWidth + spouseGap;
         positions.push({ member: unit.spouse, x: spouseX, y });
         memberPositions.set(unit.spouse.id, { x: spouseX, y });
