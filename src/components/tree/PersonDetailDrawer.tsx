@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -8,9 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   User, Edit, Trash2, Plus, Heart, Users, 
-  Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send, History, Clock
+  Calendar, Image, FileText, ArrowUp, ArrowDown, Loader2, Send, History, Clock, ChevronRight
 } from "lucide-react";
 import type { TreeMember, Relationship, RelationshipType, PhotoWithTags } from "@/types/database";
 import { format } from "date-fns";
@@ -88,6 +89,118 @@ const relationshipTypes: { value: RelationshipType; label: string }[] = [
   { value: "partner", label: "Partner" },
 ];
 
+interface ExtendedRelation {
+  member: TreeMember;
+  label: string;
+  priority: number;
+}
+
+function getGenderLabel(member: TreeMember, male: string, female: string, neutral: string): string {
+  if (member.gender === "male") return male;
+  if (member.gender === "female") return female;
+  return neutral;
+}
+
+function getExtendedRelationships(
+  personId: string,
+  rels: Relationship[],
+  mems: TreeMember[],
+  directRelatedIds: Set<string>
+): ExtendedRelation[] {
+  const memberMap = new Map(mems.map(m => [m.id, m]));
+  const seen = new Map<string, ExtendedRelation>();
+
+  const addIfNew = (id: string, label: string, priority: number) => {
+    if (id === personId || directRelatedIds.has(id)) return;
+    const m = memberMap.get(id);
+    if (!m) return;
+    const existing = seen.get(id);
+    if (!existing || priority < existing.priority) {
+      seen.set(id, { member: m, label, priority });
+    }
+  };
+
+  const getParentsOf = (pid: string) =>
+    rels.filter(r => r.relationship_type === "parent" && r.to_person_id === pid).map(r => r.from_person_id);
+  const getChildrenOf = (pid: string) =>
+    rels.filter(r => r.relationship_type === "parent" && r.from_person_id === pid).map(r => r.to_person_id);
+
+  const parents = getParentsOf(personId);
+  const children = getChildrenOf(personId);
+
+  const siblingIds = new Set<string>();
+  for (const parentId of parents) {
+    for (const childId of getChildrenOf(parentId)) {
+      if (childId !== personId) siblingIds.add(childId);
+    }
+  }
+  for (const sid of siblingIds) {
+    const m = memberMap.get(sid);
+    if (m) addIfNew(sid, getGenderLabel(m, "Brother", "Sister", "Sibling"), 1);
+  }
+
+  const grandparentIds: string[] = [];
+  for (const parentId of parents) {
+    for (const gpId of getParentsOf(parentId)) {
+      grandparentIds.push(gpId);
+      const m = memberMap.get(gpId);
+      if (m) addIfNew(gpId, getGenderLabel(m, "Grandfather", "Grandmother", "Grandparent"), 2);
+    }
+  }
+
+  for (const gpId of grandparentIds) {
+    for (const ggpId of getParentsOf(gpId)) {
+      const m = memberMap.get(ggpId);
+      if (m) addIfNew(ggpId, getGenderLabel(m, "Great-Grandfather", "Great-Grandmother", "Great-Grandparent"), 3);
+    }
+  }
+
+  const grandchildIds: string[] = [];
+  for (const childId of children) {
+    for (const gcId of getChildrenOf(childId)) {
+      grandchildIds.push(gcId);
+      const m = memberMap.get(gcId);
+      if (m) addIfNew(gcId, getGenderLabel(m, "Grandson", "Granddaughter", "Grandchild"), 2);
+    }
+  }
+
+  for (const gcId of grandchildIds) {
+    for (const ggcId of getChildrenOf(gcId)) {
+      const m = memberMap.get(ggcId);
+      if (m) addIfNew(ggcId, getGenderLabel(m, "Great-Grandson", "Great-Granddaughter", "Great-Grandchild"), 3);
+    }
+  }
+
+  const auntUncleIds: string[] = [];
+  for (const parentId of parents) {
+    for (const gpId of getParentsOf(parentId)) {
+      for (const auId of getChildrenOf(gpId)) {
+        if (auId !== parentId && !parents.includes(auId)) {
+          auntUncleIds.push(auId);
+          const m = memberMap.get(auId);
+          if (m) addIfNew(auId, getGenderLabel(m, "Uncle", "Aunt", "Uncle/Aunt"), 3);
+        }
+      }
+    }
+  }
+
+  for (const sid of siblingIds) {
+    for (const nnId of getChildrenOf(sid)) {
+      const m = memberMap.get(nnId);
+      if (m) addIfNew(nnId, getGenderLabel(m, "Nephew", "Niece", "Nephew/Niece"), 3);
+    }
+  }
+
+  for (const auId of auntUncleIds) {
+    for (const cId of getChildrenOf(auId)) {
+      const m = memberMap.get(cId);
+      if (m) addIfNew(cId, "Cousin", 4);
+    }
+  }
+
+  return Array.from(seen.values()).sort((a, b) => a.priority - b.priority);
+}
+
 export function PersonDetailDrawer({
   open,
   onOpenChange,
@@ -111,9 +224,28 @@ export function PersonDetailDrawer({
   const [editRelType, setEditRelType] = useState<RelationshipType>("parent");
   const [editByMarriage, setEditByMarriage] = useState(false);
   const [newNote, setNewNote] = useState("");
+  const [showExtendedFamily, setShowExtendedFamily] = useState(false);
   
   const { notes, isLoading: notesLoading, createNote, deleteNote } = usePersonNotes(person?.id);
   const { data: personPhotos, isLoading: photosLoading } = usePersonPhotos(person?.id, person?.family_tree_id);
+
+  const personRelationships = relationships.filter(
+    (r) => person && (r.from_person_id === person.id || r.to_person_id === person.id)
+  );
+
+  const directRelatedIds = useMemo(() => {
+    if (!person) return new Set<string>();
+    const ids = new Set<string>();
+    personRelationships.forEach(r => {
+      ids.add(r.from_person_id === person.id ? r.to_person_id : r.from_person_id);
+    });
+    return ids;
+  }, [personRelationships, person?.id]);
+
+  const extendedFamily = useMemo(
+    () => person ? getExtendedRelationships(person.id, relationships, members, directRelatedIds) : [],
+    [person?.id, relationships, members, directRelatedIds]
+  );
 
   if (!person) return null;
 
@@ -122,10 +254,6 @@ export function PersonDetailDrawer({
   const getRelatedPerson = (personId: string) => {
     return members.find((m) => m.id === personId);
   };
-
-  const personRelationships = relationships.filter(
-    (r) => r.from_person_id === person.id || r.to_person_id === person.id
-  );
 
   const handleConfirmDelete = () => {
     setShowDeleteDialog(false);
@@ -369,6 +497,46 @@ export function PersonDetailDrawer({
                     );
                   })}
                 </div>
+              )}
+
+              {extendedFamily.length > 0 && (
+                <Collapsible open={showExtendedFamily} onOpenChange={setShowExtendedFamily} className="mt-6">
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="sm" className="w-full justify-between px-2">
+                      <span className="text-sm font-medium">Extended Family ({extendedFamily.length})</span>
+                      <ChevronRight className={`w-4 h-4 transition-transform ${showExtendedFamily ? "rotate-90" : ""}`} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="mt-2 space-y-2">
+                    {extendedFamily.map((ext) => (
+                      <div
+                        key={ext.member.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-sage-light flex items-center justify-center">
+                            {ext.member.profile_photo_url ? (
+                              <img
+                                src={ext.member.profile_photo_url}
+                                alt={`${ext.member.first_name} ${ext.member.last_name || ""}`}
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <User className="w-5 h-5 text-primary/60" />
+                            )}
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">
+                              {ext.member.first_name} {ext.member.last_name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{ext.label}</p>
+                          </div>
+                        </div>
+                        <Badge variant="outline" className="text-xs">{ext.label}</Badge>
+                      </div>
+                    ))}
+                  </CollapsibleContent>
+                </Collapsible>
               )}
             </TabsContent>
 
