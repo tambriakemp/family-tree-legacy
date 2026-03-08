@@ -399,7 +399,7 @@ export function PersonDetailDrawer({
                         >
                           <div className="flex items-center gap-2 mb-2">
                             <Badge variant="outline" className="text-xs">
-                              {relationshipLabels[rel.relationship_type]}
+                              {getRelationshipLabel(rel.relationship_type, related)}
                             </Badge>
                             {rel.by_marriage && (
                               <Badge variant="secondary" className="text-xs">
