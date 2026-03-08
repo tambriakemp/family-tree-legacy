@@ -89,6 +89,118 @@ const relationshipTypes: { value: RelationshipType; label: string }[] = [
   { value: "partner", label: "Partner" },
 ];
 
+interface ExtendedRelation {
+  member: TreeMember;
+  label: string;
+  priority: number;
+}
+
+function getGenderLabel(member: TreeMember, male: string, female: string, neutral: string): string {
+  if (member.gender === "male") return male;
+  if (member.gender === "female") return female;
+  return neutral;
+}
+
+function getExtendedRelationships(
+  personId: string,
+  rels: Relationship[],
+  mems: TreeMember[],
+  directRelatedIds: Set<string>
+): ExtendedRelation[] {
+  const memberMap = new Map(mems.map(m => [m.id, m]));
+  const seen = new Map<string, ExtendedRelation>();
+
+  const addIfNew = (id: string, label: string, priority: number) => {
+    if (id === personId || directRelatedIds.has(id)) return;
+    const m = memberMap.get(id);
+    if (!m) return;
+    const existing = seen.get(id);
+    if (!existing || priority < existing.priority) {
+      seen.set(id, { member: m, label, priority });
+    }
+  };
+
+  const getParentsOf = (pid: string) =>
+    rels.filter(r => r.relationship_type === "parent" && r.to_person_id === pid).map(r => r.from_person_id);
+  const getChildrenOf = (pid: string) =>
+    rels.filter(r => r.relationship_type === "parent" && r.from_person_id === pid).map(r => r.to_person_id);
+
+  const parents = getParentsOf(personId);
+  const children = getChildrenOf(personId);
+
+  const siblingIds = new Set<string>();
+  for (const parentId of parents) {
+    for (const childId of getChildrenOf(parentId)) {
+      if (childId !== personId) siblingIds.add(childId);
+    }
+  }
+  for (const sid of siblingIds) {
+    const m = memberMap.get(sid);
+    if (m) addIfNew(sid, getGenderLabel(m, "Brother", "Sister", "Sibling"), 1);
+  }
+
+  const grandparentIds: string[] = [];
+  for (const parentId of parents) {
+    for (const gpId of getParentsOf(parentId)) {
+      grandparentIds.push(gpId);
+      const m = memberMap.get(gpId);
+      if (m) addIfNew(gpId, getGenderLabel(m, "Grandfather", "Grandmother", "Grandparent"), 2);
+    }
+  }
+
+  for (const gpId of grandparentIds) {
+    for (const ggpId of getParentsOf(gpId)) {
+      const m = memberMap.get(ggpId);
+      if (m) addIfNew(ggpId, getGenderLabel(m, "Great-Grandfather", "Great-Grandmother", "Great-Grandparent"), 3);
+    }
+  }
+
+  const grandchildIds: string[] = [];
+  for (const childId of children) {
+    for (const gcId of getChildrenOf(childId)) {
+      grandchildIds.push(gcId);
+      const m = memberMap.get(gcId);
+      if (m) addIfNew(gcId, getGenderLabel(m, "Grandson", "Granddaughter", "Grandchild"), 2);
+    }
+  }
+
+  for (const gcId of grandchildIds) {
+    for (const ggcId of getChildrenOf(gcId)) {
+      const m = memberMap.get(ggcId);
+      if (m) addIfNew(ggcId, getGenderLabel(m, "Great-Grandson", "Great-Granddaughter", "Great-Grandchild"), 3);
+    }
+  }
+
+  const auntUncleIds: string[] = [];
+  for (const parentId of parents) {
+    for (const gpId of getParentsOf(parentId)) {
+      for (const auId of getChildrenOf(gpId)) {
+        if (auId !== parentId && !parents.includes(auId)) {
+          auntUncleIds.push(auId);
+          const m = memberMap.get(auId);
+          if (m) addIfNew(auId, getGenderLabel(m, "Uncle", "Aunt", "Uncle/Aunt"), 3);
+        }
+      }
+    }
+  }
+
+  for (const sid of siblingIds) {
+    for (const nnId of getChildrenOf(sid)) {
+      const m = memberMap.get(nnId);
+      if (m) addIfNew(nnId, getGenderLabel(m, "Nephew", "Niece", "Nephew/Niece"), 3);
+    }
+  }
+
+  for (const auId of auntUncleIds) {
+    for (const cId of getChildrenOf(auId)) {
+      const m = memberMap.get(cId);
+      if (m) addIfNew(cId, "Cousin", 4);
+    }
+  }
+
+  return Array.from(seen.values()).sort((a, b) => a.priority - b.priority);
+}
+
 export function PersonDetailDrawer({
   open,
   onOpenChange,
