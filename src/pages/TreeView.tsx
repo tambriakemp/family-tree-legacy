@@ -601,6 +601,7 @@ const TreeView = () => {
         isDeletingRelationship={deleteRelationship.isPending}
         onUpdateRelationship={handleUpdateRelationship}
         isUpdatingRelationship={updateRelationship.isPending}
+        onCreateRelationship={async (data) => { await createRelationship.mutateAsync(data); }}
       />
 
       <InviteCollaboratorDialog
