@@ -48,7 +48,7 @@ export function PersonNode({ person, x, y, isSelected, onClick }: PersonNodeProp
         <image
           href={person.profile_photo_url}
           x={x + 15}
-          y={y + 20}
+          y={y + 28}
           width={40}
           height={40}
           clipPath={`url(#avatar-clip-${person.id})`}
