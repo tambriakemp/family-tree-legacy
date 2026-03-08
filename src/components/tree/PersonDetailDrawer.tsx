@@ -268,6 +268,9 @@ export function PersonDetailDrawer({
     setEditingRelationship(rel);
     setEditRelType(rel.relationship_type);
     setEditByMarriage(rel.by_marriage || false);
+    const relatedId = rel.from_person_id === person.id ? rel.to_person_id : rel.from_person_id;
+    setEditToPersonId(relatedId);
+    setEditOriginalRelatedId(relatedId);
   };
 
   const handleSaveRelationship = () => {
