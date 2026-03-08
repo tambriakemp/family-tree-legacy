@@ -45,7 +45,22 @@ const TreeView = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const { toast } = useToast();
+
+  // Onboarding tooltip after first person added
+  useEffect(() => {
+    if (members.length === 1 && !localStorage.getItem("familyflow-onboarding-dismissed")) {
+      setShowOnboarding(true);
+    } else if (members.length > 1) {
+      setShowOnboarding(false);
+    }
+  }, [members.length]);
+
+  const dismissOnboarding = () => {
+    setShowOnboarding(false);
+    localStorage.setItem("familyflow-onboarding-dismissed", "true");
+  };
 
   // Use hierarchical tree layout
   const { nodePositions, svgWidth, svgHeight, connections } = useTreeLayout(
