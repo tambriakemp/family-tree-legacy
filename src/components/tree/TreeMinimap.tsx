@@ -83,7 +83,7 @@ export function TreeMinimap({
   if (nodePositions.length === 0) return null;
 
   return (
-    <div className="fixed bottom-[140px] left-6 z-10 bg-card/95 backdrop-blur-sm rounded-lg border border-border shadow-lg p-2">
+    <div className="fixed bottom-6 left-6 z-10 bg-card/95 backdrop-blur-sm rounded-lg border border-border shadow-lg p-2">
       <div className="text-xs text-muted-foreground mb-1 px-1">Overview</div>
       <svg
         width={MINIMAP_WIDTH}
