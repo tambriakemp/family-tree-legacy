@@ -52,27 +52,6 @@ const Dashboard = () => {
     error: string | null;
   } | null>(null);
 
-  // Debug function to check what Postgres sees (only when debug mode is active)
-  useEffect(() => {
-    if (!showDebug || !user) return;
-    
-    const checkDebugContext = async () => {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { data: session } = await supabase.auth.getSession();
-      
-      const { data, error } = await supabase.rpc('debug_request_context');
-      
-      setDebugInfo({
-        sessionUserId: session?.session?.user?.id || null,
-        dbAuthUid: data?.[0]?.auth_uid || null,
-        dbJwtSub: data?.[0]?.jwt_sub || null,
-        dbJwtRole: data?.[0]?.jwt_role || null,
-        error: error?.message || null,
-      });
-    };
-    
-    checkDebugContext();
-  }, [user, showDebug]);
 
   // Handle invite deep link
   useEffect(() => {
