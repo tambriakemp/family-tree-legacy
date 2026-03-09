@@ -39,6 +39,18 @@ export function PhotoGallery({
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoWithTags | null>(null);
   const [showTagPopover, setShowTagPopover] = useState(false);
 
+  // Keep selectedPhoto in sync with latest data
+  useEffect(() => {
+    if (selectedPhoto) {
+      const updated = photos.find((p) => p.id === selectedPhoto.id);
+      if (updated) {
+        setSelectedPhoto(updated);
+      } else {
+        setSelectedPhoto(null);
+      }
+    }
+  }, [photos]);
+
   const getMemberName = (personId: string) => {
     const member = members.find((m) => m.id === personId);
     return member ? `${member.first_name}${member.last_name ? ` ${member.last_name}` : ""}` : "Unknown";
