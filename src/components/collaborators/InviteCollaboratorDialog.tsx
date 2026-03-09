@@ -70,7 +70,7 @@ export function InviteCollaboratorDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-primary" />
@@ -81,37 +81,23 @@ export function InviteCollaboratorDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-3">
+          <div className="space-y-1.5">
             <Label>Permission Level</Label>
             <Select value={role} onValueChange={(value: "editor" | "viewer") => setRole(value)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="editor">
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium">Editor</span>
-                    <span className="text-xs text-muted-foreground">
-                      Can add, edit, and delete people and events
-                    </span>
-                  </div>
-                </SelectItem>
-                <SelectItem value="viewer">
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium">Viewer</span>
-                    <span className="text-xs text-muted-foreground">
-                      Can only view the family tree
-                    </span>
-                  </div>
-                </SelectItem>
+                <SelectItem value="editor">Editor — can add, edit, and delete</SelectItem>
+                <SelectItem value="viewer">Viewer — can only view</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label>Invite Link</Label>
-            <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 p-3">
+            <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2">
               <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0" />
               <span className="text-sm text-foreground truncate flex-1">
                 {inviteLink}
