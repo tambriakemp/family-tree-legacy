@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Tag, Trash2, Loader2, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,18 @@ export function PhotoGallery({
 }: PhotoGalleryProps) {
   const [selectedPhoto, setSelectedPhoto] = useState<PhotoWithTags | null>(null);
   const [showTagPopover, setShowTagPopover] = useState(false);
+
+  // Keep selectedPhoto in sync with latest data
+  useEffect(() => {
+    if (selectedPhoto) {
+      const updated = photos.find((p) => p.id === selectedPhoto.id);
+      if (updated) {
+        setSelectedPhoto(updated);
+      } else {
+        setSelectedPhoto(null);
+      }
+    }
+  }, [photos]);
 
   const getMemberName = (personId: string) => {
     const member = members.find((m) => m.id === personId);
