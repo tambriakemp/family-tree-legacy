@@ -31,7 +31,7 @@ const TreeView = () => {
   const { updateTree } = useFamilyTrees();
   const { members, isLoading: membersLoading, createMember, updateMember, deleteMember } = useTreeMembers(treeId);
   const { relationships, createRelationship, deleteRelationship, updateRelationship } = useRelationships(treeId);
-  const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
+  const { collaborators, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
