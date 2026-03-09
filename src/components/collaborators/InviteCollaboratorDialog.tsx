@@ -70,7 +70,7 @@ export function InviteCollaboratorDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-sm w-[calc(100%-2rem)]">
+      <DialogContent className="max-w-lg w-full mx-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-primary" />
@@ -81,11 +81,11 @@ export function InviteCollaboratorDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="flex flex-col gap-4 p-1 overflow-hidden">
           <div className="space-y-1.5">
             <Label>Permission Level</Label>
             <Select value={role} onValueChange={(value: "editor" | "viewer") => setRole(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -95,11 +95,11 @@ export function InviteCollaboratorDialog({
             </Select>
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 overflow-hidden">
             <Label>Invite Link</Label>
-            <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2">
+            <div className="flex items-center gap-2 rounded-lg border border-input bg-muted/50 px-3 py-2 overflow-hidden">
               <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span className="text-sm text-foreground truncate flex-1">
+              <span className="w-full truncate text-sm text-foreground">
                 {inviteLink}
               </span>
             </div>
