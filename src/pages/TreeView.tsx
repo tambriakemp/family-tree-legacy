@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, UserPlus, Loader2, Calendar, Image, RotateCcw, Search, X, Download, TreeDeciduous, Upload } from "lucide-react";
+import { ArrowLeft, Plus, ZoomIn, ZoomOut, Users, Loader2, Calendar, Image, RotateCcw, Search, X, TreeDeciduous } from "lucide-react";
 import { ProjectSettingsDialog } from "@/components/tree/ProjectSettingsDialog";
 import html2canvas from "html2canvas";
 import { useToast } from "@/hooks/use-toast";
@@ -31,7 +31,7 @@ const TreeView = () => {
   const { updateTree } = useFamilyTrees();
   const { members, isLoading: membersLoading, createMember, updateMember, deleteMember } = useTreeMembers(treeId);
   const { relationships, createRelationship, deleteRelationship, updateRelationship } = useRelationships(treeId);
-  const { collaborators, sendInvite, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
+  const { collaborators, updateCollaboratorRole, removeCollaborator, resendInvite } = useCollaborators(treeId);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
